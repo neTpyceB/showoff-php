@@ -1,0 +1,14 @@
+services:
+  app:
+    container_name: showoff-php-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    command: ["tail", "-f", "/dev/null"]
