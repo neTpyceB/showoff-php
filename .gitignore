@@ -1,1 +1,7 @@
-.idea/
+/vendor/
+/var/
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/.idea/
+.env
+.env.local
