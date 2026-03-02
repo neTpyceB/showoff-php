@@ -3,13 +3,43 @@
     "description": "Foundational strict-typed PHP CLI application for runtime and configuration basics.",
     "type": "project",
     "license": "proprietary",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/config",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/health",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/console",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "packages/http",
+            "options": {
+                "symlink": false
+            }
+        }
+    ],
     "require": {
         "php": "^8.5",
-        "symfony/console": "^8.0",
         "symfony/dotenv": "^8.0",
-        "symfony/http-foundation": "^8.0",
-        "symfony/routing": "^8.0",
-        "twig/twig": "^3.22"
+        "showoff/config": "^1.0",
+        "showoff/console": "^1.0",
+        "showoff/health": "^1.0",
+        "showoff/http": "^1.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.94",
@@ -18,7 +48,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Showoff\\Core\\": "src/"
+            "Showoff\\Core\\Bootstrap\\": "src/Bootstrap/"
         }
     },
     "autoload-dev": {

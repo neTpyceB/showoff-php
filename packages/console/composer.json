@@ -1,0 +1,18 @@
+{
+    "name": "showoff/console",
+    "description": "Console module for the Showoff PHP application.",
+    "type": "library",
+    "license": "proprietary",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.5",
+        "showoff/config": "^1.0",
+        "showoff/health": "^1.0",
+        "symfony/console": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Showoff\\Core\\Console\\": "src/Console/"
+        }
+    }
+}

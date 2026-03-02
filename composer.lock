@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d9bedaacaa5f5608bdc1ec84f0f5010f",
+    "content-hash": "7f63660451f8a538bb70aad08bffab0c",
     "packages": [
         {
             "name": "psr/container",
@@ -58,6 +58,118 @@
                 "source": "https://github.com/php-fig/container/tree/2.0.2"
             },
             "time": "2021-11-05T16:47:00+00:00"
+        },
+        {
+            "name": "showoff/config",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/config",
+                "reference": "2de4e1f2d127f5515193d8b56478043da18509e1"
+            },
+            "require": {
+                "php": "^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Config\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Configuration module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "showoff/console",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/console",
+                "reference": "df29c61612f2c39fde8dd81a0c49de6e1a65bb19"
+            },
+            "require": {
+                "php": "^8.5",
+                "showoff/config": "^1.0",
+                "showoff/health": "^1.0",
+                "symfony/console": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Console\\": "src/Console/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Console module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "showoff/health",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/health",
+                "reference": "07626000e125830159d8e3e2269ba0b29ed35395"
+            },
+            "require": {
+                "php": "^8.5",
+                "showoff/config": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Health\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Health and runtime diagnostics module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "showoff/http",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/http",
+                "reference": "fb6ad745f338748ba4d5444b24453b7fb029bdc2"
+            },
+            "require": {
+                "php": "^8.5",
+                "showoff/config": "^1.0",
+                "symfony/http-foundation": "^8.0",
+                "symfony/routing": "^8.0",
+                "twig/twig": "^3.22"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Http\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "HTTP module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         },
         {
             "name": "symfony/console",

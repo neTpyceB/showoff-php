@@ -1,0 +1,19 @@
+{
+    "name": "showoff/http",
+    "description": "HTTP module for the Showoff PHP application.",
+    "type": "library",
+    "license": "proprietary",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.5",
+        "showoff/config": "^1.0",
+        "symfony/http-foundation": "^8.0",
+        "symfony/routing": "^8.0",
+        "twig/twig": "^3.22"
+    },
+    "autoload": {
+        "psr-4": {
+            "Showoff\\Core\\Http\\": "src/"
+        }
+    }
+}

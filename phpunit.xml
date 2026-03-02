@@ -14,6 +14,7 @@
     <source>
         <include>
             <directory>src</directory>
+            <directory>packages</directory>
         </include>
     </source>
 </phpunit>
