@@ -9,6 +9,8 @@ services:
       - ./:/app
     env_file:
       - .env
+    ports:
+      - "8080:8080"
     stdin_open: true
     tty: true
-    command: ["tail", "-f", "/dev/null"]
+    command: ["php", "-S", "0.0.0.0:8080", "-t", "public", "public/index.php"]

@@ -1,0 +1,40 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block content %}
+    <section class="grid">
+        <div class="stack">
+            <h1>Contact form</h1>
+            <p class="meta">Demonstrates request parsing, validation, CSRF protection, session flash messages, PRG redirect flow, and cookies.</p>
+            <p class="meta">Recorded submissions this session: {{ submission_count }}</p>
+            <p class="meta">Last contact email cookie: {{ last_contact_email ?: 'none' }}</p>
+        </div>
+
+        {% if errors['_token'] is defined %}
+            <p class="error">{{ errors['_token'] }}</p>
+        {% endif %}
+
+        <form method="post" action="/contact" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+
+            <label>
+                Name
+                <input type="text" name="name" value="{{ values.name }}">
+                {% if errors.name is defined %}<span class="error">{{ errors.name }}</span>{% endif %}
+            </label>
+
+            <label>
+                Email
+                <input type="email" name="email" value="{{ values.email }}">
+                {% if errors.email is defined %}<span class="error">{{ errors.email }}</span>{% endif %}
+            </label>
+
+            <label>
+                Message
+                <textarea name="message">{{ values.message }}</textarea>
+                {% if errors.message is defined %}<span class="error">{{ errors.message }}</span>{% endif %}
+            </label>
+
+            <button type="submit">Send message</button>
+        </form>
+    </section>
+{% endblock %}

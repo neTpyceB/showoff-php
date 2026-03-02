@@ -14,6 +14,7 @@ composer test
 composer analyse
 composer cs:check
 composer cs:fix
+php -S 127.0.0.1:8080 -t public public/index.php
 ```
 
 ## Environment
@@ -31,7 +32,10 @@ Key variables:
 - `APP_LOG_LEVEL`
 - `APP_SECRET`
 - `APP_BUILD_COMMIT`
+- `APP_URL`
+- `APP_SESSION_NAME`
+- `APP_SESSION_COOKIE_SECURE`
 
 ## Testing policy
 
-All non-trivial generated logic must ship with PHPUnit coverage. New runtime services or commands should include focused unit or command tests before merging.
+All non-trivial generated logic must ship with PHPUnit coverage. New web flows should include focused request/form/session tests before merging.

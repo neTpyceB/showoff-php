@@ -19,11 +19,16 @@ final readonly class ConfigLoader
         $logLevel = strtolower($environmentReader->string('APP_LOG_LEVEL', 'info') ?? 'info');
         $secret = $environmentReader->string('APP_SECRET', $environment->isProduction() ? null : 'local-development-secret-key');
         $buildCommit = $environmentReader->string('APP_BUILD_COMMIT');
+        $appUrl = $environmentReader->string('APP_URL', 'http://localhost:8080') ?? 'http://localhost:8080';
+        $sessionName = $environmentReader->string('APP_SESSION_NAME', 'SHOWOFFSESSID') ?? 'SHOWOFFSESSID';
+        $sessionCookieSecure = $environmentReader->bool('APP_SESSION_COOKIE_SECURE', $environment->isProduction());
 
         $this->assertTimezone($timezone);
         $this->assertLogLevel($logLevel);
         $this->assertSecret($secret, $environment);
         $this->assertBuildCommit($buildCommit);
+        $this->assertAppUrl($appUrl);
+        $this->assertSessionName($sessionName);
 
         return new AppConfig(
             appName: $environmentReader->string('APP_NAME', 'Showoff PHP Core') ?? 'Showoff PHP Core',
@@ -35,6 +40,9 @@ final readonly class ConfigLoader
             logLevel: $logLevel,
             secret: $secret ?? '',
             buildCommit: $buildCommit,
+            appUrl: $appUrl,
+            sessionName: $sessionName,
+            sessionCookieSecure: $sessionCookieSecure,
         );
     }
 
@@ -76,6 +84,22 @@ final readonly class ConfigLoader
 
         if (preg_match('/^[a-f0-9]{7,40}$/i', $buildCommit) !== 1) {
             throw new ConfigurationException('APP_BUILD_COMMIT must be a git SHA-like value.');
+        }
+    }
+
+    private function assertAppUrl(string $appUrl): void
+    {
+        $isValid = filter_var($appUrl, FILTER_VALIDATE_URL) !== false;
+
+        if (!$isValid) {
+            throw new ConfigurationException('APP_URL must be a valid absolute URL.');
+        }
+    }
+
+    private function assertSessionName(string $sessionName): void
+    {
+        if (preg_match('/^[A-Z0-9_]{3,32}$/', $sessionName) !== 1) {
+            throw new ConfigurationException('APP_SESSION_NAME must match /^[A-Z0-9_]{3,32}$/.');
         }
     }
 }

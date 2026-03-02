@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5efe5;
+            --panel: #fffaf2;
+            --ink: #1d1a16;
+            --muted: #5e554b;
+            --accent: #006d77;
+            --accent-soft: #dff3f4;
+            --danger: #b42318;
+            --border: #d6c9b8;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            background:
+                radial-gradient(circle at top left, #fdf6ec 0, #f5efe5 45%, #efe5d8 100%);
+            color: var(--ink);
+        }
+        main {
+            width: min(960px, calc(100% - 2rem));
+            margin: 3rem auto;
+            background: color-mix(in srgb, var(--panel) 92%, white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 18px 48px rgba(42, 33, 19, 0.12);
+        }
+        nav {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: var(--ink);
+            padding: 0.65rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: white;
+        }
+        nav a[data-active="true"] {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .flash {
+            margin: 0 0 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            background: var(--accent-soft);
+            border: 1px solid color-mix(in srgb, var(--accent) 25%, white);
+        }
+        .grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+        form {
+            display: grid;
+            gap: 1rem;
+        }
+        label {
+            display: grid;
+            gap: 0.4rem;
+            font-weight: 700;
+        }
+        input, textarea, select, button {
+            font: inherit;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 0.85rem 0.9rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: white;
+        }
+        textarea {
+            min-height: 10rem;
+            resize: vertical;
+        }
+        .error {
+            color: var(--danger);
+            font-size: 0.92rem;
+        }
+        button {
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 0;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            width: fit-content;
+        }
+        .meta {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+        .stack {
+            display: grid;
+            gap: 0.4rem;
+        }
+        @media (max-width: 640px) {
+            main { padding: 1.25rem; margin: 1rem auto; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <nav>
+        <a href="/" data-active="{{ current_route == 'home' ? 'true' : 'false' }}">Home</a>
+        <a href="/contact" data-active="{{ current_route == 'contact' ? 'true' : 'false' }}">Contact Form</a>
+        <a href="/preferences" data-active="{{ current_route == 'preferences' ? 'true' : 'false' }}">Preferences</a>
+    </nav>
+
+    {% for type, messages in flash_messages %}
+        {% for message in messages %}
+            <p class="flash">{{ message }}</p>
+        {% endfor %}
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

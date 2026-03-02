@@ -16,6 +16,9 @@ final readonly class AppConfig
         public string $logLevel,
         public string $secret,
         public ?string $buildCommit,
+        public string $appUrl,
+        public string $sessionName,
+        public bool $sessionCookieSecure,
     ) {}
 
     /**
@@ -33,6 +36,9 @@ final readonly class AppConfig
             'log_level' => $this->logLevel,
             'secret' => $this->secret,
             'build_commit' => $this->buildCommit,
+            'app_url' => $this->appUrl,
+            'session_name' => $this->sessionName,
+            'session_cookie_secure' => $this->sessionCookieSecure,
         ];
     }
 }

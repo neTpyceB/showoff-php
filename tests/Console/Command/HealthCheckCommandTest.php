@@ -43,6 +43,9 @@ final class HealthCheckCommandTest extends TestCase
             logLevel: 'info',
             secret: 'local-development-secret-key',
             buildCommit: null,
+            appUrl: 'http://localhost:8080',
+            sessionName: 'SHOWOFFSESSID',
+            sessionCookieSecure: false,
         );
     }
 }

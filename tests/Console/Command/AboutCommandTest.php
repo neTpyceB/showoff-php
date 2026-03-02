@@ -28,6 +28,9 @@ final class AboutCommandTest extends TestCase
                 logLevel: 'info',
                 secret: 'local-development-secret-key',
                 buildCommit: 'abcdef1',
+                appUrl: 'http://localhost:8080',
+                sessionName: 'SHOWOFFSESSID',
+                sessionCookieSecure: false,
             ),
             runtimeInspector: new CommandRuntimeInspector(),
         );
