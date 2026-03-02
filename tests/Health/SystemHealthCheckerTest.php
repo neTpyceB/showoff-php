@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
+use Showoff\Core\Config\DatabaseConfig;
 use Showoff\Core\Health\DirectoryManager;
 use Showoff\Core\Health\RuntimeInspector;
 use Showoff\Core\Health\SystemHealthChecker;
@@ -18,20 +19,20 @@ final class SystemHealthCheckerTest extends TestCase
     public function testItBuildsAHealthyReportWhenAllChecksPass(): void
     {
         $checker = new SystemHealthChecker(
-            runtimeInspector: new StubRuntimeInspector('8.5.3', ['json' => true, 'mbstring' => true]),
+            runtimeInspector: new StubRuntimeInspector('8.5.3', ['json' => true, 'mbstring' => true, 'pdo' => true, 'pdo_mysql' => true]),
             directoryManager: new StubDirectoryManager(true),
         );
 
         $report = $checker->check($this->config('/tmp/cache'));
 
         self::assertTrue($report->isHealthy());
-        self::assertCount(4, $report->checks);
+        self::assertCount(6, $report->checks);
     }
 
     public function testItBuildsAnUnhealthyReportWhenAnyCheckFails(): void
     {
         $checker = new SystemHealthChecker(
-            runtimeInspector: new StubRuntimeInspector('8.4.9', ['json' => true, 'mbstring' => false]),
+            runtimeInspector: new StubRuntimeInspector('8.4.9', ['json' => true, 'mbstring' => false, 'pdo' => false, 'pdo_mysql' => false]),
             directoryManager: new StubDirectoryManager(false),
         );
 
@@ -57,6 +58,7 @@ final class SystemHealthCheckerTest extends TestCase
             appUrl: 'http://localhost:8080',
             sessionName: 'SHOWOFFSESSID',
             sessionCookieSecure: false,
+            database: new DatabaseConfig('mysql', null, 'db', 3306, 'showoff', 'showoff', 'showoff', 'utf8mb4'),
         );
     }
 }

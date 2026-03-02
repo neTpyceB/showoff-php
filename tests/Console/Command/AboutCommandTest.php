@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
+use Showoff\Core\Config\DatabaseConfig;
 use Showoff\Core\Console\Command\AboutCommand;
 use Showoff\Core\Health\RuntimeInspector;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -31,6 +32,7 @@ final class AboutCommandTest extends TestCase
                 appUrl: 'http://localhost:8080',
                 sessionName: 'SHOWOFFSESSID',
                 sessionCookieSecure: false,
+                database: new DatabaseConfig('mysql', null, 'db', 3306, 'showoff', 'showoff', 'showoff', 'utf8mb4'),
             ),
             runtimeInspector: new CommandRuntimeInspector(),
         );

@@ -19,10 +19,11 @@ final readonly class AppConfig
         public string $appUrl,
         public string $sessionName,
         public bool $sessionCookieSecure,
+        public DatabaseConfig $database,
     ) {}
 
     /**
-     * @return array<string, bool|string|null>
+     * @return array<string, array<string, int|string|null>|bool|string|null>
      */
     public function toArray(): array
     {
@@ -39,6 +40,7 @@ final readonly class AppConfig
             'app_url' => $this->appUrl,
             'session_name' => $this->sessionName,
             'session_cookie_secure' => $this->sessionCookieSecure,
+            'database' => $this->database->toArray(),
         ];
     }
 }

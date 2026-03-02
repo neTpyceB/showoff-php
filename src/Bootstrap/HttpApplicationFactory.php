@@ -18,6 +18,12 @@ use Showoff\Core\Http\Routing\RouteCollectionFactory;
 use Showoff\Core\Http\Session\NativeSessionFactory;
 use Showoff\Core\Http\Session\WebSessionManager;
 use Showoff\Core\Http\View\TwigViewRenderer;
+use Showoff\Core\Persistence\Clock\SystemClock;
+use Showoff\Core\Persistence\Connection\PdoConnectionFactory;
+use Showoff\Core\Persistence\Connection\PdoTransactionManager;
+use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
+use Showoff\Core\Persistence\Contact\PdoContactSubmissionEventRepository;
+use Showoff\Core\Persistence\Contact\PdoContactSubmissionRepository;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -34,6 +40,14 @@ final readonly class HttpApplicationFactory
 
         $config = new ConfigLoader($this->projectRoot)->load(EnvironmentReader::fromGlobals());
         date_default_timezone_set($config->timezone);
+        $connection = new PdoConnectionFactory()->create($config->database);
+        $submissionRepository = new PdoContactSubmissionRepository($connection);
+        $submissionRecorder = new ContactSubmissionRecorder(
+            transactionManager: new PdoTransactionManager($connection),
+            submissionRepository: $submissionRepository,
+            eventRepository: new PdoContactSubmissionEventRepository($connection),
+            clock: new SystemClock(),
+        );
 
         $renderer = new TwigViewRenderer(new Environment(
             new FilesystemLoader($this->projectRoot . '/templates'),
@@ -54,6 +68,8 @@ final readonly class HttpApplicationFactory
                 $sessionManager,
                 new ContactFormHandler($tokenManager),
                 $tokenManager,
+                $submissionRecorder,
+                $submissionRepository,
             ),
             'preferences' => new PreferencesController(
                 $config,

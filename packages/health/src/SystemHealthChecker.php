@@ -14,7 +14,7 @@ final readonly class SystemHealthChecker
     public function __construct(
         private RuntimeInspector $runtimeInspector,
         private DirectoryManager $directoryManager,
-        private array $requiredExtensions = ['json', 'mbstring'],
+        private array $requiredExtensions = ['json', 'mbstring', 'pdo', 'pdo_mysql'],
     ) {}
 
     public function check(AppConfig $config): HealthReport

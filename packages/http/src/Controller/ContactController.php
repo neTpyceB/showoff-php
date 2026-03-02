@@ -9,6 +9,9 @@ use Showoff\Core\Http\Form\ContactFormHandler;
 use Showoff\Core\Http\Form\FormTokenManager;
 use Showoff\Core\Http\Session\WebSessionManager;
 use Showoff\Core\Http\View\TwigViewRenderer;
+use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
+use Showoff\Core\Persistence\Contact\ContactSubmissionRepository;
+use Showoff\Core\Persistence\Contact\NewContactSubmission;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +25,8 @@ final readonly class ContactController
         private WebSessionManager $sessionManager,
         private ContactFormHandler $formHandler,
         private FormTokenManager $tokenManager,
+        private ContactSubmissionRecorder $submissionRecorder,
+        private ContactSubmissionRepository $submissionRepository,
     ) {}
 
     public function __invoke(Request $request): Response
@@ -36,8 +41,12 @@ final readonly class ContactController
                     return new Response('Invalid form state.', Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
+                $this->submissionRecorder->record(new NewContactSubmission(
+                    name: $result->data->name,
+                    email: $result->data->email,
+                    message: $result->data->message,
+                ));
                 $this->sessionManager->addFlash($request, 'success', 'Contact form submitted successfully.');
-                $this->sessionManager->increment($request, 'contact_submissions');
 
                 $response = new RedirectResponse('/contact', Response::HTTP_SEE_OTHER);
                 $response->headers->setCookie(Cookie::create(
@@ -58,7 +67,7 @@ final readonly class ContactController
                 'csrf_token' => $this->tokenManager->tokenFor($session, ContactFormHandler::FORM_NAME),
                 'errors' => $result->errors,
                 'values' => $result->submittedValues,
-                'submission_count' => $this->sessionManager->getInt($request, 'contact_submissions'),
+                'submission_count' => $this->submissionRepository->countAll(),
                 'last_contact_email' => $request->cookies->get('last_contact_email'),
             ]), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -74,7 +83,7 @@ final readonly class ContactController
                 'email' => $request->cookies->get('last_contact_email', ''),
                 'message' => '',
             ],
-            'submission_count' => $this->sessionManager->getInt($request, 'contact_submissions'),
+            'submission_count' => $this->submissionRepository->countAll(),
             'last_contact_email' => $request->cookies->get('last_contact_email'),
         ]));
     }

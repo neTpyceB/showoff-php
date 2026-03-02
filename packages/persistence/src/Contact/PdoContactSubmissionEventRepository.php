@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Showoff\Core\Persistence\Contact;
+
+use JsonException;
+use PDO;
+
+final readonly class PdoContactSubmissionEventRepository implements ContactSubmissionEventRepository
+{
+    public function __construct(
+        private PDO $connection,
+    ) {}
+
+    public function add(ContactSubmissionEvent $event): ContactSubmissionEvent
+    {
+        $statement = $this->connection->prepare(
+            'INSERT INTO contact_submission_events (submission_id, event_name, occurred_at, metadata_json) VALUES (:submission_id, :event_name, :occurred_at, :metadata_json)',
+        );
+
+        try {
+            $metadata = json_encode($event->metadata, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new \RuntimeException('Unable to encode contact submission metadata.', 0, $exception);
+        }
+
+        $statement->execute([
+            'submission_id' => $event->submissionId,
+            'event_name' => $event->eventName,
+            'occurred_at' => $event->occurredAt->format('Y-m-d H:i:s.u'),
+            'metadata_json' => $metadata,
+        ]);
+
+        return new ContactSubmissionEvent(
+            id: (int) $this->connection->lastInsertId(),
+            submissionId: $event->submissionId,
+            eventName: $event->eventName,
+            occurredAt: $event->occurredAt,
+            metadata: $event->metadata,
+        );
+    }
+
+    public function countForSubmission(int $submissionId): int
+    {
+        $statement = $this->connection->prepare(
+            'SELECT COUNT(*) FROM contact_submission_events WHERE submission_id = :submission_id',
+        );
+        $statement->execute(['submission_id' => $submissionId]);
+
+        return (int) $statement->fetchColumn();
+    }
+}

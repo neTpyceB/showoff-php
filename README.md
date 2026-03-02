@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Dockerized PHP Execution Environment` stage. This iteration upgrades the runtime to a reproducible PHP-FPM, Nginx, and MySQL container stack while preserving the existing CLI and HTTP foundations.
+Strict-typed PHP 8.5 application for the `Persistence Layer & Database Architecture` stage. This iteration adds a real PDO-backed data layer with migrations, repositories, transactions, and relational modeling on top of the existing modularized runtime.
 
 ## Project structure
 
@@ -27,22 +27,25 @@ Strict-typed PHP 8.5 application for the `Dockerized PHP Execution Environment` 
 ├── public/index.php
 ├── phpstan.neon.dist
 ├── phpunit.xml
+├── packages
+│   ├── config
+│   ├── console
+│   ├── health
+│   ├── http
+│   └── persistence
 ├── railway.toml
 ├── templates
 │   ├── layout
 │   └── pages
 ├── src
-│   ├── Bootstrap
-│   ├── Config
-│   ├── Console
-│   ├── Http
-│   └── Health
+│   └── Bootstrap
 └── tests
     ├── Bootstrap
     ├── Config
     ├── Console
     ├── Http
-    └── Health
+    ├── Health
+    └── Persistence
 ```
 
 ## Local run
@@ -50,6 +53,7 @@ Strict-typed PHP 8.5 application for the `Dockerized PHP Execution Environment` 
 ```bash
 cp .env.example .env
 docker compose up --build -d
+docker compose exec app php bin/app app:database:migrate
 ```
 
 Open:
@@ -66,6 +70,8 @@ CLI tooling remains available:
 docker compose exec app php bin/app list
 docker compose exec app php bin/app app:about
 docker compose exec app php bin/app app:config:dump
+docker compose exec app php bin/app app:database:status
+docker compose exec app php bin/app app:database:migrate
 docker compose exec app php bin/app app:health:check
 ```
 
@@ -77,8 +83,10 @@ composer analyse
 composer cs:check
 docker compose up --build -d
 docker compose exec app sh
+docker compose exec app php bin/app app:database:migrate
 docker compose exec app php bin/app app:health:check
 docker compose exec app php -m | grep pdo_mysql
+docker compose exec app php -m | grep pdo_sqlite
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
 ```
 
@@ -88,6 +96,16 @@ Docker services:
 web: http://127.0.0.1:8080/
 app: php-fpm on 9000 inside compose
 db:  mysql on 127.0.0.1:3306
+```
+
+Local packages:
+
+```text
+showoff/config
+showoff/health
+showoff/console
+showoff/http
+showoff/persistence
 ```
 
 More detail lives in:

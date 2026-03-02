@@ -22,6 +22,7 @@ jobs:
           php-version: "8.5"
           tools: composer:v2
           coverage: none
+          extensions: mbstring, pdo_mysql, pdo_sqlite
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
