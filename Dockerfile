@@ -10,6 +10,7 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/app
 
 COPY composer.json composer.lock* ./
+COPY packages ./packages
 
 RUN composer install --no-interaction --no-progress --prefer-dist
 

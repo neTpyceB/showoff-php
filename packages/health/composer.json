@@ -1,0 +1,16 @@
+{
+    "name": "showoff/health",
+    "description": "Health and runtime diagnostics module for the Showoff PHP application.",
+    "type": "library",
+    "license": "proprietary",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.5",
+        "showoff/config": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Showoff\\Core\\Health\\": "src/"
+        }
+    }
+}
