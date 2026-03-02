@@ -9,17 +9,22 @@
 ## Commands
 
 ```bash
-composer install
 composer test
 composer analyse
 composer cs:check
 composer cs:fix
-php -S 127.0.0.1:8080 -t public public/index.php
+docker compose up --build -d
+docker compose exec app sh
 ```
 
 ## Environment
 
 Start from `.env.example` and override locally with `.env`.
+
+Container runtime uses:
+
+- `env/app.env`
+- `env/mysql.env`
 
 Key variables:
 
@@ -35,6 +40,11 @@ Key variables:
 - `APP_URL`
 - `APP_SESSION_NAME`
 - `APP_SESSION_COOKIE_SECURE`
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `DATABASE_NAME`
+- `DATABASE_USER`
+- `DATABASE_PASSWORD`
 
 ## Testing policy
 

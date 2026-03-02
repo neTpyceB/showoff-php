@@ -4,40 +4,44 @@
 
 ```bash
 cp .env.example .env
-composer install
-php -S 127.0.0.1:8080 -t public public/index.php
+docker compose up --build -d
 ```
 
-HTTP endpoints:
+Stack endpoints:
 
 ```text
-/
-/contact
-/preferences
+web: http://127.0.0.1:8080/
+db: mysql://showoff:showoff@127.0.0.1:3306/showoff
 ```
 
 CLI commands:
 
 ```bash
-php bin/app app:about
-php bin/app app:config:dump
-php bin/app app:health:check
+docker compose exec app php bin/app list
+docker compose exec app php bin/app app:about
+docker compose exec app php bin/app app:config:dump
+docker compose exec app php bin/app app:health:check
 ```
 
 Local execution requires PHP 8.5+.
 
-## Docker
+HTTP checks:
 
 ```bash
-cp .env.example .env
-docker compose up --build -d
-docker compose exec app sh
-docker compose exec app php bin/app app:health:check
 curl -i http://127.0.0.1:8080/
 curl -i http://127.0.0.1:8080/contact
+curl -i http://127.0.0.1:8080/preferences
 ```
 
-The container runs the PHP built-in server as PID 1, so you can inspect the live process and execute commands interactively.
+Container inspection:
+
+```bash
+docker compose ps
+docker compose exec app sh
+docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
+```
+
+The app container runs `php-fpm` as PID 1. Nginx is the public entrypoint.
 
 ## Railway
 

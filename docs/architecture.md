@@ -2,19 +2,26 @@
 
 ## Scope
 
-This stage implements the application web layer on top of the existing runtime foundation:
+This stage implements a reproducible container runtime on top of the existing application foundation:
 
 - strict typing and modern PHP 8.5 conventions
-- front controller HTTP bootstrap
-- explicit request routing and controller resolution
-- response generation for HTML pages and redirects
-- session-backed state and flash messaging
-- cookie-backed preference persistence
-- form processing with CSRF validation
+- PHP-FPM application runtime
+- Nginx reverse proxy and FastCGI handoff
+- MySQL service for local infrastructure parity
+- service-scoped environment separation
+- persistent volumes and health checks
 - validated environment-driven configuration
 - runtime health checks and CLI diagnostics remain available
 
 ## Modules
+
+### `docker/`
+
+Contains PHP-FPM and Nginx runtime configuration.
+
+### `env/`
+
+Contains service-specific environment files for the compose stack.
 
 ### `src/Bootstrap`
 
@@ -38,4 +45,4 @@ Encapsulates runtime and filesystem checks behind small interfaces to keep the c
 
 ## Extension path
 
-Future stages can add persistence, authentication, messaging, or framework integration without rewriting the current bootstrap, routing, or configuration core.
+Future stages can add persistence and infrastructure integrations without replacing the runtime topology again.
