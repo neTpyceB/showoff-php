@@ -2,47 +2,42 @@
 
 ## Scope
 
-This stage implements a reproducible container runtime on top of the existing application foundation:
+This stage implements the first real data layer on top of the existing application foundation:
 
 - strict typing and modern PHP 8.5 conventions
-- PHP-FPM application runtime
-- Nginx reverse proxy and FastCGI handoff
-- MySQL service for local infrastructure parity
-- service-scoped environment separation
-- persistent volumes and health checks
-- validated environment-driven configuration
-- runtime health checks and CLI diagnostics remain available
+- environment-driven database configuration
+- PDO connection management with explicit transaction boundaries
+- migration execution and status reporting
+- repository abstractions backed by MySQL-compatible SQL
+- relational modeling for contact submissions and submission events
+- thin HTTP and CLI adapters over testable persistence services
 
 ## Modules
 
-### `docker/`
+### `packages/config`
 
-Contains PHP-FPM and Nginx runtime configuration.
+Configuration value objects, readers, validation, and redaction.
 
-### `env/`
+### `packages/health`
 
-Contains service-specific environment files for the compose stack.
+Runtime inspection and health reporting abstractions.
+
+### `packages/console`
+
+Console commands and CLI-facing behavior.
+
+### `packages/http`
+
+HTTP kernel, controllers, routing, sessions, forms, and view rendering.
+
+### `packages/persistence`
+
+PDO connection factory, transaction manager, migrations, repositories, and persistence services.
 
 ### `src/Bootstrap`
 
-Builds both the console application and the HTTP kernel wiring.
-
-### `src/Config`
-
-Defines immutable application configuration, environment parsing, validation, and safe redaction for diagnostics.
-
-### `src/Console`
-
-Contains CLI commands for runtime metadata, effective configuration inspection, and health validation.
-
-### `src/Http`
-
-Contains the web kernel, controllers, routing, session orchestration, view rendering, and form processing.
-
-### `src/Health`
-
-Encapsulates runtime and filesystem checks behind small interfaces to keep the core logic fully testable.
+Builds the root application by composing the reusable packages.
 
 ## Extension path
 
-Future stages can add persistence and infrastructure integrations without replacing the runtime topology again.
+Future stages can layer Doctrine ORM/DBAL, richer aggregates, or async workflows onto the current repository and migration boundaries without rewriting the application entrypoints.

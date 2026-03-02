@@ -54,6 +54,24 @@ final readonly class EnvironmentReader
         };
     }
 
+    public function int(string $key, ?int $default = null): ?int
+    {
+        $value = $this->string($key);
+
+        if ($value === null) {
+            return $default;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+            throw new ConfigurationException(sprintf(
+                'Environment variable "%s" must be an integer-compatible value.',
+                $key,
+            ));
+        }
+
+        return (int) $value;
+    }
+
     private function raw(string $key): mixed
     {
         return $this->env[$key] ?? $this->server[$key] ?? getenv($key) ?: null;

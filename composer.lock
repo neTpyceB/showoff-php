@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7f63660451f8a538bb70aad08bffab0c",
+    "content-hash": "efd6501aaddfdedfd4f66fcbbc4ce289",
     "packages": [
         {
             "name": "psr/container",
@@ -91,12 +91,13 @@
             "dist": {
                 "type": "path",
                 "url": "packages/console",
-                "reference": "df29c61612f2c39fde8dd81a0c49de6e1a65bb19"
+                "reference": "41183823728d6ac6ec2331d05aab32359a77bc8f"
             },
             "require": {
                 "php": "^8.5",
                 "showoff/config": "^1.0",
                 "showoff/health": "^1.0",
+                "showoff/persistence": "^1.0",
                 "symfony/console": "^8.0"
             },
             "type": "library",
@@ -147,11 +148,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/http",
-                "reference": "fb6ad745f338748ba4d5444b24453b7fb029bdc2"
+                "reference": "0f3b4adb6a4db482845a6e402988ca25aba3abab"
             },
             "require": {
                 "php": "^8.5",
                 "showoff/config": "^1.0",
+                "showoff/persistence": "^1.0",
                 "symfony/http-foundation": "^8.0",
                 "symfony/routing": "^8.0",
                 "twig/twig": "^3.22"
@@ -166,6 +168,33 @@
                 "proprietary"
             ],
             "description": "HTTP module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "showoff/persistence",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/persistence",
+                "reference": "dcd2933b5f53799a3deea97003e205a826f2877c"
+            },
+            "require": {
+                "php": "^8.5",
+                "showoff/config": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Persistence\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Persistence module for the Showoff PHP application.",
             "transport-options": {
                 "symlink": false,
                 "relative": true

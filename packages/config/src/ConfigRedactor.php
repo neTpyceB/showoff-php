@@ -7,15 +7,23 @@ namespace Showoff\Core\Config;
 final class ConfigRedactor
 {
     /**
-     * @param array<string, bool|string|null> $config
+     * @param array<string, mixed> $config
      *
-     * @return array<string, bool|string|null>
+     * @return array<string, mixed>
      */
     public function redact(array $config): array
     {
         $redacted = [];
 
         foreach ($config as $key => $value) {
+            if (is_array($value)) {
+                /** @var array<string, mixed> $nestedValue */
+                $nestedValue = $value;
+                $redacted[$key] = $this->redact($nestedValue);
+
+                continue;
+            }
+
             $redacted[$key] = $this->isSensitive($key) && is_string($value)
                 ? '[REDACTED]'
                 : $value;

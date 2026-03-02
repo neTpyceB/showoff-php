@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
+use Showoff\Core\Config\DatabaseConfig;
 use Showoff\Core\Console\Command\HealthCheckCommand;
 use Showoff\Core\Health\DirectoryManager;
 use Showoff\Core\Health\RuntimeInspector;
@@ -46,6 +47,7 @@ final class HealthCheckCommandTest extends TestCase
             appUrl: 'http://localhost:8080',
             sessionName: 'SHOWOFFSESSID',
             sessionCookieSecure: false,
+            database: new DatabaseConfig('mysql', null, 'db', 3306, 'showoff', 'showoff', 'showoff', 'utf8mb4'),
         );
     }
 }

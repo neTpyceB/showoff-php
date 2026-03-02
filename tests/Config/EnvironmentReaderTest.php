@@ -36,4 +36,11 @@ final class EnvironmentReaderTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $reader->bool('APP_DEBUG', false);
     }
+
+    public function testItParsesIntegerValues(): void
+    {
+        $reader = new EnvironmentReader(server: [], env: ['DATABASE_PORT' => '3306']);
+
+        self::assertSame(3306, $reader->int('DATABASE_PORT'));
+    }
 }

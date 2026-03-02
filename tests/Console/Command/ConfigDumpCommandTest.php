@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
 use Showoff\Core\Config\ConfigRedactor;
+use Showoff\Core\Config\DatabaseConfig;
 use Showoff\Core\Console\Command\ConfigDumpCommand;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -31,6 +32,7 @@ final class ConfigDumpCommandTest extends TestCase
                 appUrl: 'http://localhost:8080',
                 sessionName: 'SHOWOFFSESSID',
                 sessionCookieSecure: false,
+                database: new DatabaseConfig('mysql', null, 'db', 3306, 'showoff', 'showoff', 'showoff', 'utf8mb4'),
             ),
             configRedactor: new ConfigRedactor(),
         );
@@ -40,5 +42,6 @@ final class ConfigDumpCommandTest extends TestCase
         self::assertSame(0, $tester->execute([]));
         self::assertStringContainsString('"app_name": "Core App"', $tester->getDisplay());
         self::assertStringContainsString('"secret": "[REDACTED]"', $tester->getDisplay());
+        self::assertStringContainsString('"password": "[REDACTED]"', $tester->getDisplay());
     }
 }

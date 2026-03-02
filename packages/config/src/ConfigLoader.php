@@ -22,6 +22,7 @@ final readonly class ConfigLoader
         $appUrl = $environmentReader->string('APP_URL', 'http://localhost:8080') ?? 'http://localhost:8080';
         $sessionName = $environmentReader->string('APP_SESSION_NAME', 'SHOWOFFSESSID') ?? 'SHOWOFFSESSID';
         $sessionCookieSecure = $environmentReader->bool('APP_SESSION_COOKIE_SECURE', $environment->isProduction());
+        $databaseConfig = $this->buildDatabaseConfig($environmentReader);
 
         $this->assertTimezone($timezone);
         $this->assertLogLevel($logLevel);
@@ -43,7 +44,26 @@ final readonly class ConfigLoader
             appUrl: $appUrl,
             sessionName: $sessionName,
             sessionCookieSecure: $sessionCookieSecure,
+            database: $databaseConfig,
         );
+    }
+
+    private function buildDatabaseConfig(EnvironmentReader $environmentReader): DatabaseConfig
+    {
+        $config = new DatabaseConfig(
+            driver: strtolower($environmentReader->string('DATABASE_DRIVER', 'mysql') ?? 'mysql'),
+            dsn: $environmentReader->string('DATABASE_DSN'),
+            host: $environmentReader->string('DATABASE_HOST'),
+            port: $environmentReader->int('DATABASE_PORT'),
+            database: $environmentReader->string('DATABASE_NAME'),
+            username: $environmentReader->string('DATABASE_USER'),
+            password: $environmentReader->string('DATABASE_PASSWORD'),
+            charset: $environmentReader->string('DATABASE_CHARSET', 'utf8mb4') ?? 'utf8mb4',
+        );
+
+        $this->assertDatabaseConfig($config);
+
+        return $config;
     }
 
     private function assertTimezone(string $timezone): void
@@ -100,6 +120,37 @@ final readonly class ConfigLoader
     {
         if (preg_match('/^[A-Z0-9_]{3,32}$/', $sessionName) !== 1) {
             throw new ConfigurationException('APP_SESSION_NAME must match /^[A-Z0-9_]{3,32}$/.');
+        }
+    }
+
+    private function assertDatabaseConfig(DatabaseConfig $databaseConfig): void
+    {
+        if ($databaseConfig->dsn !== null) {
+            if (!str_contains($databaseConfig->dsn, ':')) {
+                throw new ConfigurationException('DATABASE_DSN must be a valid PDO DSN.');
+            }
+
+            return;
+        }
+
+        if ($databaseConfig->driver !== 'mysql') {
+            throw new ConfigurationException('DATABASE_DRIVER must be "mysql" when DATABASE_DSN is not set.');
+        }
+
+        if ($databaseConfig->host === null || $databaseConfig->database === null) {
+            throw new ConfigurationException('DATABASE_HOST and DATABASE_NAME are required.');
+        }
+
+        if ($databaseConfig->username === null || $databaseConfig->password === null) {
+            throw new ConfigurationException('DATABASE_USER and DATABASE_PASSWORD are required.');
+        }
+
+        if ($databaseConfig->port === null || $databaseConfig->port < 1 || $databaseConfig->port > 65535) {
+            throw new ConfigurationException('DATABASE_PORT must be between 1 and 65535.');
+        }
+
+        if ($databaseConfig->charset === null || trim($databaseConfig->charset) === '') {
+            throw new ConfigurationException('DATABASE_CHARSET must not be empty.');
         }
     }
 }

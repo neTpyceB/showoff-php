@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
+use Showoff\Core\Config\DatabaseConfig;
 use Showoff\Core\Http\Controller\ContactController;
 use Showoff\Core\Http\Controller\ControllerResolver;
 use Showoff\Core\Http\Controller\HomeController;
@@ -20,6 +21,13 @@ use Showoff\Core\Http\Routing\RouteCollectionFactory;
 use Showoff\Core\Http\Session\SessionFactory;
 use Showoff\Core\Http\Session\WebSessionManager;
 use Showoff\Core\Http\View\TwigViewRenderer;
+use Showoff\Core\Persistence\Clock\Clock;
+use Showoff\Core\Persistence\Connection\TransactionManager;
+use Showoff\Core\Persistence\Contact\ContactSubmission;
+use Showoff\Core\Persistence\Contact\ContactSubmissionEvent;
+use Showoff\Core\Persistence\Contact\ContactSubmissionEventRepository;
+use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
+use Showoff\Core\Persistence\Contact\ContactSubmissionRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -89,6 +97,7 @@ final class HttpKernelTest extends TestCase
             appUrl: 'http://localhost:8080',
             sessionName: 'SHOWOFFSESSID',
             sessionCookieSecure: false,
+            database: new DatabaseConfig('mysql', null, 'db', 3306, 'showoff', 'showoff', 'showoff', 'utf8mb4'),
         );
         $renderer = new TwigViewRenderer(new Environment(new ArrayLoader([
             'pages/home.html.twig' => 'HTTP fundamentals {{ request_count }}',
@@ -99,6 +108,8 @@ final class HttpKernelTest extends TestCase
         $sessionManager = new WebSessionManager(new TestSessionFactory(
             $session ?? new Session(new MockArraySessionStorage()),
         ));
+        $submissionRepository = new InMemoryContactSubmissionRepository();
+        $eventRepository = new InMemoryContactSubmissionEventRepository();
         $resolver = new ControllerResolver([
             'home' => new HomeController($appConfig, $renderer, $sessionManager),
             'contact' => new ContactController(
@@ -107,6 +118,13 @@ final class HttpKernelTest extends TestCase
                 $sessionManager,
                 new ContactFormHandler($tokenManager),
                 $tokenManager,
+                new ContactSubmissionRecorder(
+                    new ImmediateTransactionManager(),
+                    $submissionRepository,
+                    $eventRepository,
+                    new FixedClock(new \DateTimeImmutable('2026-03-02 10:00:00')),
+                ),
+                $submissionRepository,
             ),
             'preferences' => new PreferencesController(
                 $appConfig,
@@ -134,5 +152,88 @@ final readonly class TestSessionFactory implements SessionFactory
     public function create(): SessionInterface
     {
         return $this->session;
+    }
+}
+
+final class InMemoryContactSubmissionRepository implements ContactSubmissionRepository
+{
+    /** @var list<ContactSubmission> */
+    private array $submissions = [];
+
+    public function add(ContactSubmission $submission): ContactSubmission
+    {
+        $stored = new ContactSubmission(
+            id: count($this->submissions) + 1,
+            name: $submission->name,
+            email: $submission->email,
+            message: $submission->message,
+            status: $submission->status,
+            submittedAt: $submission->submittedAt,
+        );
+        $this->submissions[] = $stored;
+
+        return $stored;
+    }
+
+    public function countAll(): int
+    {
+        return count($this->submissions);
+    }
+
+    public function latest(): ?ContactSubmission
+    {
+        if ($this->submissions === []) {
+            return null;
+        }
+
+        return $this->submissions[count($this->submissions) - 1];
+    }
+}
+
+final class InMemoryContactSubmissionEventRepository implements ContactSubmissionEventRepository
+{
+    /** @var list<ContactSubmissionEvent> */
+    private array $events = [];
+
+    public function add(ContactSubmissionEvent $event): ContactSubmissionEvent
+    {
+        $stored = new ContactSubmissionEvent(
+            id: count($this->events) + 1,
+            submissionId: $event->submissionId,
+            eventName: $event->eventName,
+            occurredAt: $event->occurredAt,
+            metadata: $event->metadata,
+        );
+        $this->events[] = $stored;
+
+        return $stored;
+    }
+
+    public function countForSubmission(int $submissionId): int
+    {
+        return count(array_filter(
+            $this->events,
+            static fn(ContactSubmissionEvent $event): bool => $event->submissionId === $submissionId,
+        ));
+    }
+}
+
+final readonly class ImmediateTransactionManager implements TransactionManager
+{
+    public function transactional(callable $operation): mixed
+    {
+        return $operation();
+    }
+}
+
+final readonly class FixedClock implements Clock
+{
+    public function __construct(
+        private \DateTimeImmutable $now,
+    ) {}
+
+    public function now(): \DateTimeImmutable
+    {
+        return $this->now;
     }
 }

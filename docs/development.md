@@ -15,6 +15,8 @@ composer cs:check
 composer cs:fix
 docker compose up --build -d
 docker compose exec app sh
+docker compose exec app php bin/app app:database:status
+docker compose exec app php bin/app app:database:migrate
 ```
 
 ## Environment
@@ -25,6 +27,14 @@ Container runtime uses:
 
 - `env/app.env`
 - `env/mysql.env`
+
+Local packages:
+
+- `packages/config`
+- `packages/health`
+- `packages/console`
+- `packages/http`
+- `packages/persistence`
 
 Key variables:
 
@@ -41,11 +51,13 @@ Key variables:
 - `APP_SESSION_NAME`
 - `APP_SESSION_COOKIE_SECURE`
 - `DATABASE_HOST`
+- `DATABASE_DRIVER`
 - `DATABASE_PORT`
 - `DATABASE_NAME`
 - `DATABASE_USER`
 - `DATABASE_PASSWORD`
+- `DATABASE_CHARSET`
 
 ## Testing policy
 
-All non-trivial generated logic must ship with PHPUnit coverage. New web flows should include focused request/form/session tests before merging.
+All non-trivial generated logic must ship with PHPUnit coverage. Persistence changes must include migration, repository, and transaction tests before merging.
