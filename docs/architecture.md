@@ -2,19 +2,23 @@
 
 ## Scope
 
-This stage implements the foundational runtime layer only:
+This stage implements the application web layer on top of the existing runtime foundation:
 
 - strict typing and modern PHP 8.5 conventions
-- deterministic CLI bootstrap
+- front controller HTTP bootstrap
+- explicit request routing and controller resolution
+- response generation for HTML pages and redirects
+- session-backed state and flash messaging
+- cookie-backed preference persistence
+- form processing with CSRF validation
 - validated environment-driven configuration
-- runtime health checks
-- testable command surface
+- runtime health checks and CLI diagnostics remain available
 
 ## Modules
 
 ### `src/Bootstrap`
 
-Builds the console application and wires runtime dependencies.
+Builds both the console application and the HTTP kernel wiring.
 
 ### `src/Config`
 
@@ -24,10 +28,14 @@ Defines immutable application configuration, environment parsing, validation, an
 
 Contains CLI commands for runtime metadata, effective configuration inspection, and health validation.
 
+### `src/Http`
+
+Contains the web kernel, controllers, routing, session orchestration, view rendering, and form processing.
+
 ### `src/Health`
 
 Encapsulates runtime and filesystem checks behind small interfaces to keep the core logic fully testable.
 
 ## Extension path
 
-Future stages can add HTTP delivery, persistence, messaging, or framework integration without rewriting the bootstrap and configuration core.
+Future stages can add persistence, authentication, messaging, or framework integration without rewriting the current bootstrap, routing, or configuration core.

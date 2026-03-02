@@ -17,5 +17,6 @@ COPY . .
 
 RUN chmod +x bin/app
 RUN mkdir -p var/cache
+EXPOSE 8080
 
-CMD ["tail", "-f", "/dev/null"]
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public", "public/index.php"]

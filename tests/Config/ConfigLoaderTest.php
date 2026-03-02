@@ -29,6 +29,9 @@ final class ConfigLoaderTest extends TestCase
                 'APP_LOG_LEVEL' => 'warning',
                 'APP_SECRET' => '0123456789abcdef',
                 'APP_BUILD_COMMIT' => 'a1b2c3d4',
+                'APP_URL' => 'https://portfolio-core.test',
+                'APP_SESSION_NAME' => 'PORTFOLIOSESSID',
+                'APP_SESSION_COOKIE_SECURE' => 'true',
             ],
         ));
 
@@ -41,6 +44,9 @@ final class ConfigLoaderTest extends TestCase
         self::assertSame('warning', $config->logLevel);
         self::assertSame('0123456789abcdef', $config->secret);
         self::assertSame('a1b2c3d4', $config->buildCommit);
+        self::assertSame('https://portfolio-core.test', $config->appUrl);
+        self::assertSame('PORTFOLIOSESSID', $config->sessionName);
+        self::assertTrue($config->sessionCookieSecure);
     }
 
     public function testItRejectsInvalidTimezones(): void
@@ -67,6 +73,20 @@ final class ConfigLoaderTest extends TestCase
             env: [
                 'APP_ENV' => 'production',
                 'APP_SECRET' => 'short',
+            ],
+        ));
+    }
+
+    public function testItRejectsInvalidAppUrl(): void
+    {
+        $loader = new ConfigLoader('/app');
+
+        $this->expectException(ConfigurationException::class);
+        $loader->load(new EnvironmentReader(
+            server: [],
+            env: [
+                'APP_SECRET' => 'local-development-secret-key',
+                'APP_URL' => 'not-a-url',
             ],
         ));
     }

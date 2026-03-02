@@ -1,0 +1,20 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block content %}
+    <section class="grid">
+        <div class="stack">
+            <h1>HTTP fundamentals in a controlled application structure</h1>
+            <p class="meta">This stage adds front controller dispatch, routing, request/response handling, sessions, cookies, and form processing.</p>
+        </div>
+
+        <div class="stack">
+            <strong>Current theme cookie:</strong>
+            <span>{{ theme }}</span>
+        </div>
+
+        <div class="stack">
+            <strong>Request counter stored in session:</strong>
+            <span>{{ request_count }}</span>
+        </div>
+    </section>
+{% endblock %}

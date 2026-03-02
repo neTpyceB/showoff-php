@@ -1,0 +1,30 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block content %}
+    <section class="grid">
+        <div class="stack">
+            <h1>Preferences</h1>
+            <p class="meta">Demonstrates cookie-backed preferences and POST form handling with redirect response behavior.</p>
+        </div>
+
+        {% if errors['_token'] is defined %}
+            <p class="error">{{ errors['_token'] }}</p>
+        {% endif %}
+
+        <form method="post" action="/preferences" novalidate>
+            <input type="hidden" name="_token" value="{{ csrf_token }}">
+
+            <label>
+                Theme
+                <select name="theme">
+                    {% for theme in ['system', 'light', 'dark'] %}
+                        <option value="{{ theme }}" {{ selected_theme == theme ? 'selected' : '' }}>{{ theme|capitalize }}</option>
+                    {% endfor %}
+                </select>
+                {% if errors.theme is defined %}<span class="error">{{ errors.theme }}</span>{% endif %}
+            </label>
+
+            <button type="submit">Save preferences</button>
+        </form>
+    </section>
+{% endblock %}

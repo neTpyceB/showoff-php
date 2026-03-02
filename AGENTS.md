@@ -3,22 +3,23 @@
 ## Project identity
 
 - Name: `showoff-php/foundational-core`
-- Topic: `PHP Language Core & Runtime Basics`
-- Current stage: foundational CLI runtime
+- Topic: `HTTP Fundamentals & Server Interaction`
+- Current stage: controlled web layer
 - PHP target: `8.5`
 
 ## Active architecture constraints
 
-- Keep scope limited to runtime/bootstrap/configuration concerns.
+- Keep scope limited to HTTP fundamentals: request/response, routing, sessions, cookies, and form handling.
 - Prefer strict typing, readonly value objects, and explicit validation.
-- Avoid introducing HTTP, ORM, queue, cache, or framework-heavy layers before they become relevant to a later stage.
-- Keep console commands thin and move logic into testable services.
+- Avoid introducing ORM, queues, APIs, or framework-heavy abstractions before they become relevant to a later stage.
+- Keep controllers thin and move logic into testable services.
 
 ## Current modules
 
-- `src/Bootstrap`: console application assembly
+- `src/Bootstrap`: console and HTTP application assembly
 - `src/Config`: environment parsing and immutable config
 - `src/Console`: CLI commands
+- `src/Http`: web kernel, controllers, routing, sessions, forms, views
 - `src/Health`: runtime and filesystem checks
 
 ## Quality gates
@@ -36,4 +37,5 @@ composer test
 composer analyse
 composer cs:check
 php bin/app list
+php -S 127.0.0.1:8080 -t public public/index.php
 ```
