@@ -34,3 +34,6 @@ jobs:
 
       - name: Run coding standards check
         run: composer cs:check
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config

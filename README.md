@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `HTTP Fundamentals & Server Interaction` stage. This iteration adds a controlled web layer with front controller dispatch, routing, request/response handling, sessions, cookies, and form processing while preserving the existing CLI/runtime foundation.
+Strict-typed PHP 8.5 application for the `Dockerized PHP Execution Environment` stage. This iteration upgrades the runtime to a reproducible PHP-FPM, Nginx, and MySQL container stack while preserving the existing CLI and HTTP foundations.
 
 ## Project structure
 
@@ -13,7 +13,13 @@ Strict-typed PHP 8.5 application for the `HTTP Fundamentals & Server Interaction
 ├── bin/app
 ├── composer.json
 ├── config/bootstrap.php
+├── docker
+│   ├── nginx
+│   └── php
 ├── docker-compose.yml
+├── env
+│   ├── app.env
+│   └── mysql.env
 ├── docs
 │   ├── architecture.md
 │   ├── development.md
@@ -43,8 +49,7 @@ Strict-typed PHP 8.5 application for the `HTTP Fundamentals & Server Interaction
 
 ```bash
 cp .env.example .env
-composer install
-php -S 127.0.0.1:8080 -t public public/index.php
+docker compose up --build -d
 ```
 
 Open:
@@ -58,10 +63,10 @@ http://127.0.0.1:8080/preferences
 CLI tooling remains available:
 
 ```bash
-php bin/app list
-php bin/app app:about
-php bin/app app:config:dump
-php bin/app app:health:check
+docker compose exec app php bin/app list
+docker compose exec app php bin/app app:about
+docker compose exec app php bin/app app:config:dump
+docker compose exec app php bin/app app:health:check
 ```
 
 ## Tooling
@@ -73,13 +78,16 @@ composer cs:check
 docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/app app:health:check
-docker compose exec app php -r 'echo file_get_contents("http://127.0.0.1:8080/");'
+docker compose exec app php -m | grep pdo_mysql
+docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
 ```
 
-Docker serves the web application on:
+Docker services:
 
 ```text
-http://127.0.0.1:8080/
+web: http://127.0.0.1:8080/
+app: php-fpm on 9000 inside compose
+db:  mysql on 127.0.0.1:3306
 ```
 
 More detail lives in:
