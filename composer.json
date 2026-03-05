@@ -49,8 +49,14 @@
     ],
     "require": {
         "php": "^8.5",
+        "symfony/config": "^8.0",
         "symfony/dependency-injection": "^8.0",
         "symfony/dotenv": "^8.0",
+        "symfony/framework-bundle": "^8.0",
+        "symfony/runtime": "^8.0",
+        "symfony/twig-bundle": "^8.0",
+        "symfony/validator": "^8.0",
+        "symfony/yaml": "^8.0",
         "showoff/config": "^1.0",
         "showoff/console": "^1.0",
         "showoff/health": "^1.0",
@@ -61,10 +67,13 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.94",
         "phpstan/phpstan": "^2.1",
-        "phpunit/phpunit": "^12.5"
+        "phpunit/phpunit": "^12.5",
+        "symfony/browser-kit": "^8.0",
+        "symfony/css-selector": "^8.0"
     },
     "autoload": {
         "psr-4": {
+            "App\\": "src/",
             "Showoff\\Core\\Bootstrap\\": "src/Bootstrap/",
             "Showoff\\Core\\Container\\": "src/Container/"
         }
@@ -75,7 +84,8 @@
         }
     },
     "bin": [
-        "bin/app"
+        "bin/app",
+        "bin/console"
     ],
     "scripts": {
         "test": "phpunit --configuration phpunit.xml",
@@ -87,7 +97,8 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "symfony/runtime": true
         }
     },
     "minimum-stability": "stable",

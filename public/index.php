@@ -2,8 +2,18 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+use App\Kernel;
+use Symfony\Component\ErrorHandler\Debug;
+use Symfony\Component\HttpFoundation\Request;
 
-$factory = new Showoff\Core\Bootstrap\HttpApplicationFactory(dirname(__DIR__));
-$response = $factory->create()->handle(Symfony\Component\HttpFoundation\Request::createFromGlobals());
+require dirname(__DIR__) . '/config/bootstrap.php';
+
+if ((bool) $_SERVER['APP_DEBUG']) {
+    Debug::enable();
+}
+
+$kernel = new Kernel((string) $_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+$request = Request::createFromGlobals();
+$response = $kernel->handle($request);
 $response->send();
+$kernel->terminate($request, $response);

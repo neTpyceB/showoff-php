@@ -15,8 +15,8 @@ composer cs:check
 composer cs:fix
 docker compose up --build -d
 docker compose exec app sh
-docker compose exec app php bin/app app:database:status
-docker compose exec app php bin/app app:database:migrate
+docker compose exec app php bin/console app:database:status
+docker compose exec app php bin/console app:database:migrate
 ```
 
 ## Environment
@@ -62,3 +62,5 @@ Key variables:
 ## Testing policy
 
 All non-trivial generated logic must ship with PHPUnit coverage. Domain changes must include value object/service tests, and infrastructure changes must keep adapter tests green.
+
+Functional Symfony lifecycle coverage is in `tests/Functional/SymfonyMvcFoundationTest.php`.

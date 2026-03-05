@@ -10,6 +10,7 @@ $finder = PhpCsFixer\Finder::create()
         __DIR__ . '/src',
         __DIR__ . '/tests',
     ])
+    ->notPath('reference.php')
     ->name('*.php');
 
 return (new PhpCsFixer\Config())
