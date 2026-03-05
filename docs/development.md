@@ -33,6 +33,7 @@ Local packages:
 - `packages/config`
 - `packages/health`
 - `packages/console`
+- `packages/domain`
 - `packages/http`
 - `packages/persistence`
 
@@ -60,4 +61,4 @@ Key variables:
 
 ## Testing policy
 
-All non-trivial generated logic must ship with PHPUnit coverage. Persistence changes must include migration, repository, and transaction tests before merging.
+All non-trivial generated logic must ship with PHPUnit coverage. Domain changes must include value object/service tests, and infrastructure changes must keep adapter tests green.

@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Persistence Layer & Database Architecture` stage. This iteration adds a real PDO-backed data layer with migrations, repositories, transactions, and relational modeling on top of the existing modularized runtime.
+Strict-typed PHP 8.5 application for the `Object-Oriented Domain Modeling` stage. This iteration introduces a strict domain layer with entities, value objects, domain services, and repository interfaces behind clear application boundaries.
 
 ## Project structure
 
@@ -30,6 +30,7 @@ Strict-typed PHP 8.5 application for the `Persistence Layer & Database Architect
 ├── packages
 │   ├── config
 │   ├── console
+│   ├── domain
 │   ├── health
 │   ├── http
 │   └── persistence
@@ -59,9 +60,15 @@ docker compose exec app php bin/app app:database:migrate
 Open:
 
 ```text
-http://127.0.0.1:8080/
-http://127.0.0.1:8080/contact
-http://127.0.0.1:8080/preferences
+http://127.0.0.1:8081/
+http://127.0.0.1:8081/contact
+http://127.0.0.1:8081/preferences
+```
+
+Port overrides (if needed):
+
+```bash
+WEB_EXPOSE_PORT=8090 DB_EXPOSE_PORT=3310 docker compose up --build -d
 ```
 
 CLI tooling remains available:
@@ -93,9 +100,9 @@ docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
 Docker services:
 
 ```text
-web: http://127.0.0.1:8080/
+web: http://127.0.0.1:8081/
 app: php-fpm on 9000 inside compose
-db:  mysql on 127.0.0.1:3306
+db:  mysql on 127.0.0.1:3307
 ```
 
 Local packages:
@@ -104,6 +111,7 @@ Local packages:
 showoff/config
 showoff/health
 showoff/console
+showoff/domain
 showoff/http
 showoff/persistence
 ```

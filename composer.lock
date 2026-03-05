@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "efd6501aaddfdedfd4f66fcbbc4ce289",
+    "content-hash": "3df70b11eb7fe652f9e24e947aeb0549",
     "packages": [
         {
             "name": "psr/container",
@@ -116,6 +116,32 @@
             }
         },
         {
+            "name": "showoff/domain",
+            "version": "1.0.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/domain",
+                "reference": "bce1a1bb4910eee27059332ff4a90458d7a80c13"
+            },
+            "require": {
+                "php": "^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Showoff\\Core\\Domain\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "description": "Domain module for the Showoff PHP application.",
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
             "name": "showoff/health",
             "version": "1.0.0",
             "dist": {
@@ -148,12 +174,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/http",
-                "reference": "0f3b4adb6a4db482845a6e402988ca25aba3abab"
+                "reference": "8c575da4bef215dedaf1a2b97c992d9ca566ea3f"
             },
             "require": {
                 "php": "^8.5",
                 "showoff/config": "^1.0",
-                "showoff/persistence": "^1.0",
+                "showoff/domain": "^1.0",
                 "symfony/http-foundation": "^8.0",
                 "symfony/routing": "^8.0",
                 "twig/twig": "^3.22"
@@ -179,11 +205,12 @@
             "dist": {
                 "type": "path",
                 "url": "packages/persistence",
-                "reference": "dcd2933b5f53799a3deea97003e205a826f2877c"
+                "reference": "cc6c75fa18d2ceb50b8302ca01cc91ad3de632ea"
             },
             "require": {
                 "php": "^8.5",
-                "showoff/config": "^1.0"
+                "showoff/config": "^1.0",
+                "showoff/domain": "^1.0"
             },
             "type": "library",
             "autoload": {

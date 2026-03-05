@@ -3,15 +3,15 @@
 ## Project identity
 
 - Name: `showoff-php/foundational-core`
-- Topic: `Persistence Layer & Database Architecture`
-- Current stage: PDO-backed persistence with migrations and repositories
+- Topic: `Object-Oriented Domain Modeling`
+- Current stage: strict domain layer with entities, value objects, services, and repository interfaces
 - PHP target: `8.5`
 
 ## Active architecture constraints
 
-- Keep scope limited to persistence concerns: database config, migrations, repositories, transactions, relational modeling.
+- Keep scope limited to domain modeling concerns: entities, value objects, services, interfaces, and strict boundaries.
 - Prefer strict typing, readonly value objects, and explicit validation.
-- Avoid introducing ORM-heavy abstractions before they become relevant to a later stage.
+- Keep transport, framework, and persistence details out of domain classes.
 - Keep controllers thin and move logic into testable services.
 
 ## Current modules
@@ -19,8 +19,9 @@
 - `packages/config`: environment parsing and immutable config
 - `packages/health`: runtime and filesystem checks
 - `packages/console`: CLI commands
+- `packages/domain`: entities, value objects, repository interfaces, domain services
 - `packages/http`: web kernel, controllers, routing, sessions, forms, views
-- `packages/persistence`: PDO connections, migrations, repositories, transactions
+- `packages/persistence`: PDO adapters, migrations, repositories, transaction boundary
 - `src/Bootstrap`: root application assembly
 - `docker/`: PHP-FPM and Nginx runtime configuration
 - `env/`: service-scoped environment files

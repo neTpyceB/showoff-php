@@ -38,6 +38,13 @@
             "options": {
                 "symlink": false
             }
+        },
+        {
+            "type": "path",
+            "url": "packages/domain",
+            "options": {
+                "symlink": false
+            }
         }
     ],
     "require": {
@@ -47,6 +54,7 @@
         "showoff/console": "^1.0",
         "showoff/health": "^1.0",
         "showoff/http": "^1.0",
+        "showoff/domain": "^1.0",
         "showoff/persistence": "^1.0"
     },
     "require-dev": {

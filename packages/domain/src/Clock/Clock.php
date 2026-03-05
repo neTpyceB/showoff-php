@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Showoff\Core\Persistence\Clock;
+namespace Showoff\Core\Domain\Clock;
 
 interface Clock
 {

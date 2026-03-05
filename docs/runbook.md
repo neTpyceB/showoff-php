@@ -11,8 +11,14 @@ docker compose exec app php bin/app app:database:migrate
 Stack endpoints:
 
 ```text
-web: http://127.0.0.1:8080/
-db: mysql://showoff:showoff@127.0.0.1:3306/showoff
+web: http://127.0.0.1:8081/
+db: mysql://showoff:showoff@127.0.0.1:3307/showoff
+```
+
+Optional port overrides:
+
+```bash
+WEB_EXPOSE_PORT=8090 DB_EXPOSE_PORT=3310 docker compose up --build -d
 ```
 
 Composer package graph:
@@ -20,6 +26,8 @@ Composer package graph:
 ```bash
 composer show showoff/*
 ```
+
+Expected modules include `showoff/domain` and `showoff/persistence`.
 
 CLI commands:
 
@@ -37,9 +45,9 @@ Local execution requires PHP 8.5+.
 HTTP checks:
 
 ```bash
-curl -i http://127.0.0.1:8080/
-curl -i http://127.0.0.1:8080/contact
-curl -i http://127.0.0.1:8080/preferences
+curl -i http://127.0.0.1:8081/
+curl -i http://127.0.0.1:8081/contact
+curl -i http://127.0.0.1:8081/preferences
 ```
 
 Container inspection:

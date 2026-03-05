@@ -1,0 +1,15 @@
+{
+    "name": "showoff/domain",
+    "description": "Domain module for the Showoff PHP application.",
+    "type": "library",
+    "license": "proprietary",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Showoff\\Core\\Domain\\": "src/"
+        }
+    }
+}

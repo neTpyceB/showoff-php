@@ -9,6 +9,14 @@ use PHPUnit\Framework\TestCase;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Config\AppEnvironment;
 use Showoff\Core\Config\DatabaseConfig;
+use Showoff\Core\Domain\Clock\Clock;
+use Showoff\Core\Domain\Contact\ContactSubmission;
+use Showoff\Core\Domain\Contact\ContactSubmissionEvent;
+use Showoff\Core\Domain\Contact\ContactSubmissionId;
+use Showoff\Core\Domain\Contact\Repository\ContactSubmissionEventRepository;
+use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
+use Showoff\Core\Domain\Contact\SubmitContactSubmission;
+use Showoff\Core\Domain\Shared\TransactionBoundary;
 use Showoff\Core\Http\Controller\ContactController;
 use Showoff\Core\Http\Controller\ControllerResolver;
 use Showoff\Core\Http\Controller\HomeController;
@@ -21,13 +29,6 @@ use Showoff\Core\Http\Routing\RouteCollectionFactory;
 use Showoff\Core\Http\Session\SessionFactory;
 use Showoff\Core\Http\Session\WebSessionManager;
 use Showoff\Core\Http\View\TwigViewRenderer;
-use Showoff\Core\Persistence\Clock\Clock;
-use Showoff\Core\Persistence\Connection\TransactionManager;
-use Showoff\Core\Persistence\Contact\ContactSubmission;
-use Showoff\Core\Persistence\Contact\ContactSubmissionEvent;
-use Showoff\Core\Persistence\Contact\ContactSubmissionEventRepository;
-use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
-use Showoff\Core\Persistence\Contact\ContactSubmissionRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -118,7 +119,7 @@ final class HttpKernelTest extends TestCase
                 $sessionManager,
                 new ContactFormHandler($tokenManager),
                 $tokenManager,
-                new ContactSubmissionRecorder(
+                new SubmitContactSubmission(
                     new ImmediateTransactionManager(),
                     $submissionRepository,
                     $eventRepository,
@@ -160,16 +161,9 @@ final class InMemoryContactSubmissionRepository implements ContactSubmissionRepo
     /** @var list<ContactSubmission> */
     private array $submissions = [];
 
-    public function add(ContactSubmission $submission): ContactSubmission
+    public function save(ContactSubmission $submission): ContactSubmission
     {
-        $stored = new ContactSubmission(
-            id: count($this->submissions) + 1,
-            name: $submission->name,
-            email: $submission->email,
-            message: $submission->message,
-            status: $submission->status,
-            submittedAt: $submission->submittedAt,
-        );
+        $stored = $submission->withId(new ContactSubmissionId(count($this->submissions) + 1));
         $this->submissions[] = $stored;
 
         return $stored;
@@ -195,12 +189,12 @@ final class InMemoryContactSubmissionEventRepository implements ContactSubmissio
     /** @var list<ContactSubmissionEvent> */
     private array $events = [];
 
-    public function add(ContactSubmissionEvent $event): ContactSubmissionEvent
+    public function save(ContactSubmissionEvent $event): ContactSubmissionEvent
     {
         $stored = new ContactSubmissionEvent(
             id: count($this->events) + 1,
             submissionId: $event->submissionId,
-            eventName: $event->eventName,
+            name: $event->name,
             occurredAt: $event->occurredAt,
             metadata: $event->metadata,
         );
@@ -209,16 +203,16 @@ final class InMemoryContactSubmissionEventRepository implements ContactSubmissio
         return $stored;
     }
 
-    public function countForSubmission(int $submissionId): int
+    public function countForSubmission(ContactSubmissionId $submissionId): int
     {
         return count(array_filter(
             $this->events,
-            static fn(ContactSubmissionEvent $event): bool => $event->submissionId === $submissionId,
+            static fn(ContactSubmissionEvent $event): bool => $event->submissionId->value === $submissionId->value,
         ));
     }
 }
 
-final readonly class ImmediateTransactionManager implements TransactionManager
+final readonly class ImmediateTransactionManager implements TransactionBoundary
 {
     public function transactional(callable $operation): mixed
     {

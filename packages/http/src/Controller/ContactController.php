@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Showoff\Core\Http\Controller;
 
 use Showoff\Core\Config\AppConfig;
+use Showoff\Core\Domain\Contact\ContactEmail;
+use Showoff\Core\Domain\Contact\ContactMessage;
+use Showoff\Core\Domain\Contact\ContactName;
+use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
+use Showoff\Core\Domain\Contact\SubmitContactSubmission;
 use Showoff\Core\Http\Form\ContactFormHandler;
 use Showoff\Core\Http\Form\FormTokenManager;
 use Showoff\Core\Http\Session\WebSessionManager;
 use Showoff\Core\Http\View\TwigViewRenderer;
-use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
-use Showoff\Core\Persistence\Contact\ContactSubmissionRepository;
-use Showoff\Core\Persistence\Contact\NewContactSubmission;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +27,7 @@ final readonly class ContactController
         private WebSessionManager $sessionManager,
         private ContactFormHandler $formHandler,
         private FormTokenManager $tokenManager,
-        private ContactSubmissionRecorder $submissionRecorder,
+        private SubmitContactSubmission $submitContactSubmission,
         private ContactSubmissionRepository $submissionRepository,
     ) {}
 
@@ -41,11 +43,11 @@ final readonly class ContactController
                     return new Response('Invalid form state.', Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
-                $this->submissionRecorder->record(new NewContactSubmission(
-                    name: $result->data->name,
-                    email: $result->data->email,
-                    message: $result->data->message,
-                ));
+                $this->submitContactSubmission->submit(
+                    name: new ContactName($result->data->name),
+                    email: new ContactEmail($result->data->email),
+                    message: new ContactMessage($result->data->message),
+                );
                 $this->sessionManager->addFlash($request, 'success', 'Contact form submitted successfully.');
 
                 $response = new RedirectResponse('/contact', Response::HTTP_SEE_OTHER);
