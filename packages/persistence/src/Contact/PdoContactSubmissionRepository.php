@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace Showoff\Core\Persistence\Contact;
 
 use PDO;
+use Showoff\Core\Domain\Contact\ContactEmail;
+use Showoff\Core\Domain\Contact\ContactMessage;
+use Showoff\Core\Domain\Contact\ContactName;
+use Showoff\Core\Domain\Contact\ContactSubmission;
+use Showoff\Core\Domain\Contact\ContactSubmissionId;
+use Showoff\Core\Domain\Contact\ContactSubmissionStatus;
+use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 
 final readonly class PdoContactSubmissionRepository implements ContactSubmissionRepository
 {
@@ -12,28 +19,23 @@ final readonly class PdoContactSubmissionRepository implements ContactSubmission
         private PDO $connection,
     ) {}
 
-    public function add(ContactSubmission $submission): ContactSubmission
+    public function save(ContactSubmission $submission): ContactSubmission
     {
         $statement = $this->connection->prepare(
             'INSERT INTO contact_submissions (name, email, message, status, submitted_at) VALUES (:name, :email, :message, :status, :submitted_at)',
         );
         $statement->execute([
-            'name' => $submission->name,
-            'email' => $submission->email,
-            'message' => $submission->message,
-            'status' => $submission->status,
+            'name' => $submission->name->value,
+            'email' => $submission->email->value,
+            'message' => $submission->message->value,
+            'status' => $submission->status->value,
             'submitted_at' => $submission->submittedAt->format('Y-m-d H:i:s.u'),
         ]);
         $id = $this->connection->lastInsertId();
 
-        return new ContactSubmission(
-            id: is_numeric($id) ? (int) $id : throw new \RuntimeException('Invalid inserted contact submission id.'),
-            name: $submission->name,
-            email: $submission->email,
-            message: $submission->message,
-            status: $submission->status,
-            submittedAt: $submission->submittedAt,
-        );
+        return $submission->withId(new ContactSubmissionId(
+            is_numeric($id) ? (int) $id : throw new \RuntimeException('Invalid inserted contact submission id.'),
+        ));
     }
 
     public function countAll(): int
@@ -68,13 +70,23 @@ final readonly class PdoContactSubmissionRepository implements ContactSubmission
         $submittedAt = $row['submitted_at'];
 
         return new ContactSubmission(
-            id: is_int($id)
-                ? $id
-                : (is_numeric($id) ? (int) $id : throw new \RuntimeException('Invalid contact submission id.')),
-            name: is_string($name) ? $name : throw new \RuntimeException('Invalid contact submission name.'),
-            email: is_string($email) ? $email : throw new \RuntimeException('Invalid contact submission email.'),
-            message: is_string($message) ? $message : throw new \RuntimeException('Invalid contact submission message.'),
-            status: is_string($status) ? $status : throw new \RuntimeException('Invalid contact submission status.'),
+            id: new ContactSubmissionId(
+                is_int($id)
+                    ? $id
+                    : (is_numeric($id) ? (int) $id : throw new \RuntimeException('Invalid contact submission id.')),
+            ),
+            name: new ContactName(
+                is_string($name) ? $name : throw new \RuntimeException('Invalid contact submission name.'),
+            ),
+            email: new ContactEmail(
+                is_string($email) ? $email : throw new \RuntimeException('Invalid contact submission email.'),
+            ),
+            message: new ContactMessage(
+                is_string($message) ? $message : throw new \RuntimeException('Invalid contact submission message.'),
+            ),
+            status: ContactSubmissionStatus::from(
+                is_string($status) ? $status : throw new \RuntimeException('Invalid contact submission status.'),
+            ),
             submittedAt: new \DateTimeImmutable(
                 is_string($submittedAt) ? $submittedAt : throw new \RuntimeException('Invalid contact submission timestamp.'),
             ),

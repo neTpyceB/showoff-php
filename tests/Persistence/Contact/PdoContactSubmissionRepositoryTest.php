@@ -6,8 +6,12 @@ namespace Showoff\Core\Tests\Persistence\Contact;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Showoff\Core\Persistence\Contact\ContactSubmission;
-use Showoff\Core\Persistence\Contact\ContactSubmissionEvent;
+use Showoff\Core\Domain\Contact\ContactEmail;
+use Showoff\Core\Domain\Contact\ContactMessage;
+use Showoff\Core\Domain\Contact\ContactName;
+use Showoff\Core\Domain\Contact\ContactSubmission;
+use Showoff\Core\Domain\Contact\ContactSubmissionEvent;
+use Showoff\Core\Domain\Contact\ContactSubmissionStatus;
 use Showoff\Core\Persistence\Contact\PdoContactSubmissionEventRepository;
 use Showoff\Core\Persistence\Contact\PdoContactSubmissionRepository;
 use Showoff\Core\Persistence\Migration\PdoMigrator;
@@ -26,24 +30,24 @@ final class PdoContactSubmissionRepositoryTest extends TestCase
 
         $repository = new PdoContactSubmissionRepository($pdo);
         $eventRepository = new PdoContactSubmissionEventRepository($pdo);
-        $stored = $repository->add(new ContactSubmission(
+        $stored = $repository->save(new ContactSubmission(
             id: null,
-            name: 'Ada Lovelace',
-            email: 'ada@example.com',
-            message: 'Persistent message body.',
-            status: 'received',
+            name: new ContactName('Ada Lovelace'),
+            email: new ContactEmail('ada@example.com'),
+            message: new ContactMessage('Persistent message body.'),
+            status: ContactSubmissionStatus::Received,
             submittedAt: new \DateTimeImmutable('2026-03-02 12:00:00'),
         ));
-        $eventRepository->add(new ContactSubmissionEvent(
+        $eventRepository->save(new ContactSubmissionEvent(
             id: null,
-            submissionId: $stored->id ?? 0,
-            eventName: 'stored',
+            submissionId: $stored->id ?? throw new \RuntimeException('Missing stored id.'),
+            name: 'stored',
             occurredAt: new \DateTimeImmutable('2026-03-02 12:00:00'),
             metadata: ['source' => 'test'],
         ));
 
         self::assertSame(1, $repository->countAll());
-        self::assertSame('ada@example.com', $repository->latest()?->email);
-        self::assertSame(1, $eventRepository->countForSubmission($stored->id ?? 0));
+        self::assertSame('ada@example.com', $repository->latest()?->email->value);
+        self::assertSame(1, $eventRepository->countForSubmission($stored->id ?? throw new \RuntimeException('Missing stored id.')));
     }
 }

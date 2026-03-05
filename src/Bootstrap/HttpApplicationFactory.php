@@ -6,6 +6,7 @@ namespace Showoff\Core\Bootstrap;
 
 use Showoff\Core\Config\ConfigLoader;
 use Showoff\Core\Config\EnvironmentReader;
+use Showoff\Core\Domain\Contact\SubmitContactSubmission;
 use Showoff\Core\Http\Controller\ContactController;
 use Showoff\Core\Http\Controller\ControllerResolver;
 use Showoff\Core\Http\Controller\HomeController;
@@ -21,7 +22,6 @@ use Showoff\Core\Http\View\TwigViewRenderer;
 use Showoff\Core\Persistence\Clock\SystemClock;
 use Showoff\Core\Persistence\Connection\PdoConnectionFactory;
 use Showoff\Core\Persistence\Connection\PdoTransactionManager;
-use Showoff\Core\Persistence\Contact\ContactSubmissionRecorder;
 use Showoff\Core\Persistence\Contact\PdoContactSubmissionEventRepository;
 use Showoff\Core\Persistence\Contact\PdoContactSubmissionRepository;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -42,8 +42,8 @@ final readonly class HttpApplicationFactory
         date_default_timezone_set($config->timezone);
         $connection = new PdoConnectionFactory()->create($config->database);
         $submissionRepository = new PdoContactSubmissionRepository($connection);
-        $submissionRecorder = new ContactSubmissionRecorder(
-            transactionManager: new PdoTransactionManager($connection),
+        $submissionService = new SubmitContactSubmission(
+            transactionBoundary: new PdoTransactionManager($connection),
             submissionRepository: $submissionRepository,
             eventRepository: new PdoContactSubmissionEventRepository($connection),
             clock: new SystemClock(),
@@ -68,7 +68,7 @@ final readonly class HttpApplicationFactory
                 $sessionManager,
                 new ContactFormHandler($tokenManager),
                 $tokenManager,
-                $submissionRecorder,
+                $submissionService,
                 $submissionRepository,
             ),
             'preferences' => new PreferencesController(

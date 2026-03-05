@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Showoff\Core\Persistence\Contact;
+namespace Showoff\Core\Domain\Contact;
 
 final readonly class ContactSubmissionEvent
 {
@@ -11,8 +11,8 @@ final readonly class ContactSubmissionEvent
      */
     public function __construct(
         public ?int $id,
-        public int $submissionId,
-        public string $eventName,
+        public ContactSubmissionId $submissionId,
+        public string $name,
         public \DateTimeImmutable $occurredAt,
         public array $metadata,
     ) {}

@@ -7,7 +7,7 @@
     "require": {
         "php": "^8.5",
         "showoff/config": "^1.0",
-        "showoff/persistence": "^1.0",
+        "showoff/domain": "^1.0",
         "symfony/http-foundation": "^8.0",
         "symfony/routing": "^8.0",
         "twig/twig": "^3.22"

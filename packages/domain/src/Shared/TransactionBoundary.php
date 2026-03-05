@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Showoff\Core\Persistence\Connection;
+namespace Showoff\Core\Domain\Shared;
 
-interface TransactionManager
+interface TransactionBoundary
 {
     /**
      * @template T

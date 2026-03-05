@@ -6,7 +6,8 @@
     "version": "1.0.0",
     "require": {
         "php": "^8.5",
-        "showoff/config": "^1.0"
+        "showoff/config": "^1.0",
+        "showoff/domain": "^1.0"
     },
     "autoload": {
         "psr-4": {

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Showoff\Core\Persistence\Connection;
 
 use PDO;
+use Showoff\Core\Domain\Shared\TransactionBoundary;
 use Throwable;
 
-final readonly class PdoTransactionManager implements TransactionManager
+final readonly class PdoTransactionManager implements TransactionBoundary
 {
     public function __construct(
         private PDO $connection,
