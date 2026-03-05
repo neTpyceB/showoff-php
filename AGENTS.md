@@ -3,15 +3,15 @@
 ## Project identity
 
 - Name: `showoff-php/foundational-core`
-- Topic: `Object-Oriented Domain Modeling`
-- Current stage: strict domain layer with entities, value objects, services, and repository interfaces
+- Topic: `Design Patterns & Dependency Injection Architecture`
+- Current stage: DI container, service configuration, factories, strategies, repositories
 - PHP target: `8.5`
 
 ## Active architecture constraints
 
-- Keep scope limited to domain modeling concerns: entities, value objects, services, interfaces, and strict boundaries.
+- Keep scope limited to DI/pattern concerns: container composition, factories, strategies, interface-driven services.
 - Prefer strict typing, readonly value objects, and explicit validation.
-- Keep transport, framework, and persistence details out of domain classes.
+- Keep bootstrap thin and move wiring into container/service config.
 - Keep controllers thin and move logic into testable services.
 
 ## Current modules
@@ -23,6 +23,7 @@
 - `packages/http`: web kernel, controllers, routing, sessions, forms, views
 - `packages/persistence`: PDO adapters, migrations, repositories, transaction boundary
 - `src/Bootstrap`: root application assembly
+- `src/Container`: DI container assembly
 - `docker/`: PHP-FPM and Nginx runtime configuration
 - `env/`: service-scoped environment files
 

@@ -8,8 +8,10 @@ use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Domain\Contact\ContactEmail;
 use Showoff\Core\Domain\Contact\ContactMessage;
 use Showoff\Core\Domain\Contact\ContactName;
+use Showoff\Core\Domain\Contact\ContactSubmissionSource;
 use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 use Showoff\Core\Domain\Contact\SubmitContactSubmission;
+use Showoff\Core\Http\Contact\SubmissionSourceStrategy;
 use Showoff\Core\Http\Form\ContactFormHandler;
 use Showoff\Core\Http\Form\FormTokenManager;
 use Showoff\Core\Http\Session\WebSessionManager;
@@ -27,6 +29,7 @@ final readonly class ContactController
         private WebSessionManager $sessionManager,
         private ContactFormHandler $formHandler,
         private FormTokenManager $tokenManager,
+        private SubmissionSourceStrategy $submissionSourceStrategy,
         private SubmitContactSubmission $submitContactSubmission,
         private ContactSubmissionRepository $submissionRepository,
     ) {}
@@ -47,6 +50,7 @@ final readonly class ContactController
                     name: new ContactName($result->data->name),
                     email: new ContactEmail($result->data->email),
                     message: new ContactMessage($result->data->message),
+                    source: new ContactSubmissionSource($this->submissionSourceStrategy->resolve($request)),
                 );
                 $this->sessionManager->addFlash($request, 'success', 'Contact form submitted successfully.');
 

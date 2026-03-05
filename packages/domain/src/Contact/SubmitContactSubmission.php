@@ -19,10 +19,16 @@ final readonly class SubmitContactSubmission
         private Clock $clock,
     ) {}
 
-    public function submit(ContactName $name, ContactEmail $email, ContactMessage $message): ContactSubmission
-    {
+    public function submit(
+        ContactName $name,
+        ContactEmail $email,
+        ContactMessage $message,
+        ?ContactSubmissionSource $source = null,
+    ): ContactSubmission {
+        $source ??= new ContactSubmissionSource('contact_form');
+
         /** @var ContactSubmission $stored */
-        $stored = $this->transactionBoundary->transactional(function () use ($name, $email, $message): ContactSubmission {
+        $stored = $this->transactionBoundary->transactional(function () use ($name, $email, $message, $source): ContactSubmission {
             $timestamp = $this->clock->now();
             $stored = $this->submissionRepository->save(ContactSubmission::new(
                 name: $name,
@@ -40,7 +46,7 @@ final readonly class SubmitContactSubmission
                 submissionId: $stored->id,
                 name: 'stored',
                 occurredAt: $timestamp,
-                metadata: ['source' => 'contact_form'],
+                metadata: ['source' => $source->value],
             ));
 
             return $stored;
