@@ -1,0 +1,58 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/Kernel.php'
+      - '../src/Bootstrap/'
+      - '../src/Container/'
+
+  App\Factory\AppConfigFactory: ~
+  Showoff\Core\Config\AppConfig:
+    factory: ['@App\Factory\AppConfigFactory', 'create']
+    arguments:
+      - '%kernel.project_dir%'
+    public: true
+
+  App\Factory\PdoFactory: ~
+  PDO:
+    class: PDO
+    factory: ['@App\Factory\PdoFactory', 'create']
+    arguments:
+      - '@Showoff\Core\Config\AppConfig'
+    public: true
+
+  Showoff\Core\Health\NativeRuntimeInspector: ~
+  Showoff\Core\Health\RuntimeInspector: '@Showoff\Core\Health\NativeRuntimeInspector'
+  Showoff\Core\Health\NativeDirectoryManager: ~
+  Showoff\Core\Health\DirectoryManager: '@Showoff\Core\Health\NativeDirectoryManager'
+
+  Showoff\Core\Persistence\Clock\SystemClock: ~
+  Showoff\Core\Domain\Clock\Clock: '@Showoff\Core\Persistence\Clock\SystemClock'
+  Showoff\Core\Persistence\Connection\PdoTransactionManager: ~
+  Showoff\Core\Domain\Shared\TransactionBoundary: '@Showoff\Core\Persistence\Connection\PdoTransactionManager'
+  Showoff\Core\Persistence\Contact\PdoContactSubmissionRepository: ~
+  Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository: '@Showoff\Core\Persistence\Contact\PdoContactSubmissionRepository'
+  Showoff\Core\Persistence\Contact\PdoContactSubmissionEventRepository: ~
+  Showoff\Core\Domain\Contact\Repository\ContactSubmissionEventRepository: '@Showoff\Core\Persistence\Contact\PdoContactSubmissionEventRepository'
+
+  Showoff\Core\Persistence\Migration\PdoMigratorFactory: ~
+  Showoff\Core\Persistence\Migration\PdoMigrator:
+    factory: ['@Showoff\Core\Persistence\Migration\PdoMigratorFactory', 'create']
+
+  Showoff\Core\Config\ConfigRedactor: ~
+  Showoff\Core\Health\SystemHealthChecker: ~
+  Showoff\Core\Domain\Contact\SubmitContactSubmission: ~
+
+  Showoff\Core\Http\Contact\HeaderSubmissionSourceStrategy: ~
+  Showoff\Core\Http\Contact\SubmissionSourceStrategy: '@Showoff\Core\Http\Contact\HeaderSubmissionSourceStrategy'
+
+  Showoff\Core\Http\Session\NativeSessionFactory: ~
+  Showoff\Core\Http\Session\SessionFactory: '@Showoff\Core\Http\Session\NativeSessionFactory'
+  Showoff\Core\Http\Session\WebSessionManager: ~
+
+  Showoff\Core\Console\Command\:
+    resource: '../packages/console/src/Console/Command/'

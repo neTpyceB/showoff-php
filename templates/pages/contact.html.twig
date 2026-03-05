@@ -9,13 +9,7 @@
             <p class="meta">Last contact email cookie: {{ last_contact_email ?: 'none' }}</p>
         </div>
 
-        {% if errors['_token'] is defined %}
-            <p class="error">{{ errors['_token'] }}</p>
-        {% endif %}
-
         <form method="post" action="/contact" novalidate>
-            <input type="hidden" name="_token" value="{{ csrf_token }}">
-
             <label>
                 Name
                 <input type="text" name="name" value="{{ values.name }}">

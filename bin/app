@@ -3,8 +3,4 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
-
-$application = (new Showoff\Core\Bootstrap\ApplicationFactory(dirname(__DIR__)))->create();
-
-exit($application->run());
+require dirname(__DIR__) . '/bin/console';

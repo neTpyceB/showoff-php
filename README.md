@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Design Patterns & Dependency Injection Architecture` stage. This iteration introduces a DI container, centralized service configuration, factories, strategies, and SOLID service boundaries.
+Strict-typed PHP 8.5 application for the `Symfony Framework Integration (MVC Foundation)` stage. This iteration migrates to Symfony Kernel lifecycle with controllers, services, Twig rendering, and validation.
 
 ## Project structure
 
@@ -11,8 +11,14 @@ Strict-typed PHP 8.5 application for the `Design Patterns & Dependency Injection
 ├── Dockerfile
 ├── README.md
 ├── bin/app
+├── bin/console
 ├── composer.json
-├── config/bootstrap.php
+├── config
+│   ├── bootstrap.php
+│   ├── bundles.php
+│   ├── packages
+│   ├── routes.yaml
+│   └── services.yaml
 ├── docker
 │   ├── nginx
 │   └── php
@@ -35,17 +41,21 @@ Strict-typed PHP 8.5 application for the `Design Patterns & Dependency Injection
 │   ├── http
 │   └── persistence
 ├── railway.toml
+├── src
+│   ├── Application
+│   ├── Controller
+│   ├── Factory
+│   ├── Http
+│   └── Kernel.php
 ├── templates
 │   ├── layout
 │   └── pages
-├── src
-│   ├── Bootstrap
-│   └── Container
 └── tests
     ├── Bootstrap
     ├── Config
     ├── Console
     ├── Domain
+    ├── Functional
     ├── Http
     ├── Health
     └── Persistence
@@ -56,7 +66,7 @@ Strict-typed PHP 8.5 application for the `Design Patterns & Dependency Injection
 ```bash
 cp .env.example .env
 docker compose up --build -d
-docker compose exec app php bin/app app:database:migrate
+docker compose exec app php bin/console app:database:migrate
 ```
 
 Open:
@@ -76,12 +86,12 @@ WEB_EXPOSE_PORT=8090 DB_EXPOSE_PORT=3310 docker compose up --build -d
 CLI tooling remains available:
 
 ```bash
-docker compose exec app php bin/app list
-docker compose exec app php bin/app app:about
-docker compose exec app php bin/app app:config:dump
-docker compose exec app php bin/app app:database:status
-docker compose exec app php bin/app app:database:migrate
-docker compose exec app php bin/app app:health:check
+docker compose exec app php bin/console list
+docker compose exec app php bin/console app:about
+docker compose exec app php bin/console app:config:dump
+docker compose exec app php bin/console app:database:status
+docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:health:check
 ```
 
 ## Tooling
@@ -92,8 +102,8 @@ composer analyse
 composer cs:check
 docker compose up --build -d
 docker compose exec app sh
-docker compose exec app php bin/app app:database:migrate
-docker compose exec app php bin/app app:health:check
+docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:health:check
 docker compose exec app php -m | grep pdo_mysql
 docker compose exec app php -m | grep pdo_sqlite
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'

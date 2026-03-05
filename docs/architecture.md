@@ -2,15 +2,15 @@
 
 ## Scope
 
-This stage implements dependency-injection-first architecture on top of the existing foundation:
+This stage implements Symfony MVC foundation on top of the existing modular codebase:
 
 - strict typing and modern PHP 8.5 conventions
-- centralized DI container and service wiring
-- factory pattern for console app, HTTP kernel, and Twig environment construction
-- strategy pattern for request-driven submission source resolution
-- repository interfaces with infrastructure adapters
-- explicit interface aliases for runtime, sessions, transactions, and repositories
-- thin bootstrap layer delegating composition to the container
+- Symfony Kernel + FrameworkBundle lifecycle
+- attribute-routed controllers in `src/Controller`
+- service wiring via `config/services.yaml`
+- Twig rendering via `templates/`
+- Symfony Validator-backed request DTO validation
+- thin controllers delegating business behavior to application/domain services
 
 ## Modules
 
@@ -28,7 +28,7 @@ Console commands and CLI-facing behavior.
 
 ### `packages/http`
 
-HTTP kernel, controllers, routing, sessions, forms, and view rendering.
+HTTP support services shared with the Symfony app layer.
 
 ### `packages/domain`
 
@@ -38,14 +38,26 @@ Entities, value objects, repository interfaces, and domain services.
 
 PDO connection factory, transaction manager, migrations, repositories, and persistence services.
 
-### `src/Bootstrap`
+### `src/Kernel.php`
 
-Contains composition factories used by service definitions.
+Symfony application kernel and lifecycle integration.
 
-### `src/Container`
+### `src/Controller`
 
-Builds the application container and loads service configuration.
+Framework controllers for home/contact/preferences flows.
+
+### `src/Application`
+
+Application services used by controllers.
+
+### `src/Http/Form`
+
+Request DTOs with Symfony validation constraints.
+
+### `src/Factory`
+
+Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
 ## Extension path
 
-Future stages can scale by adding new strategies/factories/services through container definitions without rewriting entrypoints.
+Future stages can scale by adding bundles/services/events on top of this kernel without changing runtime entrypoints.

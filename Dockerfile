@@ -18,7 +18,7 @@ COPY . .
 COPY docker/php/conf.d/app.ini /usr/local/etc/php/conf.d/99-app.ini
 COPY docker/php/fpm/zz-app.conf /usr/local/etc/php-fpm.d/zz-app.conf
 
-RUN chmod +x bin/app \
+RUN chmod +x bin/app bin/console \
     && mkdir -p var/cache var/log
 
 EXPOSE 9000

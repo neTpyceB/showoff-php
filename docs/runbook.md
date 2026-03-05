@@ -5,7 +5,7 @@
 ```bash
 cp .env.example .env
 docker compose up --build -d
-docker compose exec app php bin/app app:database:migrate
+docker compose exec app php bin/console app:database:migrate
 ```
 
 Stack endpoints:
@@ -32,12 +32,12 @@ Expected modules include `showoff/domain` and `showoff/persistence`.
 CLI commands:
 
 ```bash
-docker compose exec app php bin/app list
-docker compose exec app php bin/app app:about
-docker compose exec app php bin/app app:config:dump
-docker compose exec app php bin/app app:database:status
-docker compose exec app php bin/app app:database:migrate
-docker compose exec app php bin/app app:health:check
+docker compose exec app php bin/console list
+docker compose exec app php bin/console app:about
+docker compose exec app php bin/console app:config:dump
+docker compose exec app php bin/console app:database:status
+docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:health:check
 ```
 
 Local execution requires PHP 8.5+.
