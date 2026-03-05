@@ -49,6 +49,7 @@
     ],
     "require": {
         "php": "^8.5",
+        "symfony/dependency-injection": "^8.0",
         "symfony/dotenv": "^8.0",
         "showoff/config": "^1.0",
         "showoff/console": "^1.0",
@@ -64,7 +65,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Showoff\\Core\\Bootstrap\\": "src/Bootstrap/"
+            "Showoff\\Core\\Bootstrap\\": "src/Bootstrap/",
+            "Showoff\\Core\\Container\\": "src/Container/"
         }
     },
     "autoload-dev": {

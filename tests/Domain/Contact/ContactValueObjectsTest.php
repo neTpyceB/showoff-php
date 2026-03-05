@@ -9,6 +9,7 @@ use Showoff\Core\Domain\Contact\ContactEmail;
 use Showoff\Core\Domain\Contact\ContactMessage;
 use Showoff\Core\Domain\Contact\ContactName;
 use Showoff\Core\Domain\Contact\ContactSubmissionId;
+use Showoff\Core\Domain\Contact\ContactSubmissionSource;
 
 final class ContactValueObjectsTest extends TestCase
 {
@@ -35,5 +36,12 @@ final class ContactValueObjectsTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         new ContactSubmissionId(0);
+    }
+
+    public function testItAcceptsSubmissionSource(): void
+    {
+        $source = new ContactSubmissionSource('mobile_app');
+
+        self::assertSame('mobile_app', $source->value);
     }
 }

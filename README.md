@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Object-Oriented Domain Modeling` stage. This iteration introduces a strict domain layer with entities, value objects, domain services, and repository interfaces behind clear application boundaries.
+Strict-typed PHP 8.5 application for the `Design Patterns & Dependency Injection Architecture` stage. This iteration introduces a DI container, centralized service configuration, factories, strategies, and SOLID service boundaries.
 
 ## Project structure
 
@@ -39,11 +39,13 @@ Strict-typed PHP 8.5 application for the `Object-Oriented Domain Modeling` stage
 │   ├── layout
 │   └── pages
 ├── src
-│   └── Bootstrap
+│   ├── Bootstrap
+│   └── Container
 └── tests
     ├── Bootstrap
     ├── Config
     ├── Console
+    ├── Domain
     ├── Http
     ├── Health
     └── Persistence

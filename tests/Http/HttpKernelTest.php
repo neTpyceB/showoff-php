@@ -17,6 +17,7 @@ use Showoff\Core\Domain\Contact\Repository\ContactSubmissionEventRepository;
 use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 use Showoff\Core\Domain\Contact\SubmitContactSubmission;
 use Showoff\Core\Domain\Shared\TransactionBoundary;
+use Showoff\Core\Http\Contact\HeaderSubmissionSourceStrategy;
 use Showoff\Core\Http\Controller\ContactController;
 use Showoff\Core\Http\Controller\ControllerResolver;
 use Showoff\Core\Http\Controller\HomeController;
@@ -119,6 +120,7 @@ final class HttpKernelTest extends TestCase
                 $sessionManager,
                 new ContactFormHandler($tokenManager),
                 $tokenManager,
+                new HeaderSubmissionSourceStrategy(),
                 new SubmitContactSubmission(
                     new ImmediateTransactionManager(),
                     $submissionRepository,
