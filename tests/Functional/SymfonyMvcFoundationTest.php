@@ -5,10 +5,19 @@ declare(strict_types=1);
 namespace Showoff\Core\Tests\Functional;
 
 use App\Kernel;
+use Showoff\Core\Persistence\Migration\PdoMigrator;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class SymfonyMvcFoundationTest extends WebTestCase
 {
+    protected function setUp(): void
+    {
+        $client = static::createClient();
+        $container = $client->getContainer();
+        $this->runMigrations($container);
+    }
+
     /**
      * @param array{environment?: string, debug?: bool} $options
      */
@@ -22,7 +31,7 @@ final class SymfonyMvcFoundationTest extends WebTestCase
 
     public function testItRendersHomeRouteThroughSymfonyKernel(): void
     {
-        $client = static::createClient();
+        $client = self::requireClient();
         $client->request('GET', '/');
 
         self::assertResponseIsSuccessful();
@@ -31,7 +40,7 @@ final class SymfonyMvcFoundationTest extends WebTestCase
 
     public function testItValidatesContactFormInput(): void
     {
-        $client = static::createClient();
+        $client = self::requireClient();
         $client->request('POST', '/contact', [
             'name' => '',
             'email' => 'invalid',
@@ -44,11 +53,31 @@ final class SymfonyMvcFoundationTest extends WebTestCase
 
     public function testItAcceptsValidPreferenceSubmission(): void
     {
-        $client = static::createClient();
+        $client = self::requireClient();
         $client->request('POST', '/preferences', [
             'theme' => 'dark',
         ]);
 
         self::assertResponseRedirects('/preferences', 303);
+    }
+
+    private function runMigrations(ContainerInterface $container): void
+    {
+        $migrator = $container->get(PdoMigrator::class);
+        if (!$migrator instanceof PdoMigrator) {
+            throw new \RuntimeException('Expected PdoMigrator service.');
+        }
+
+        $migrator->migrate();
+    }
+
+    private static function requireClient(): \Symfony\Bundle\FrameworkBundle\KernelBrowser
+    {
+        $client = parent::getClient();
+        if (!$client instanceof \Symfony\Bundle\FrameworkBundle\KernelBrowser) {
+            throw new \RuntimeException('KernelBrowser is not initialized.');
+        }
+
+        return $client;
     }
 }
