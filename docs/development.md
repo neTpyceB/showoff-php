@@ -17,6 +17,8 @@ docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
+curl -i http://127.0.0.1:8081/api/v1/contact-submissions
+curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count } }"}'
 ```
 
 ## Environment
@@ -63,4 +65,7 @@ Key variables:
 
 All non-trivial generated logic must ship with PHPUnit coverage. Domain changes must include value object/service tests, and infrastructure changes must keep adapter tests green.
 
-Functional Symfony lifecycle coverage is in `tests/Functional/SymfonyMvcFoundationTest.php`.
+Functional Symfony coverage:
+
+- `tests/Functional/SymfonyMvcFoundationTest.php`
+- `tests/Functional/ApiLayerTest.php`

@@ -57,6 +57,7 @@
         "symfony/twig-bundle": "^8.0",
         "symfony/validator": "^8.0",
         "symfony/yaml": "^8.0",
+        "webonyx/graphql-php": "^15.26",
         "showoff/config": "^1.0",
         "showoff/console": "^1.0",
         "showoff/health": "^1.0",
