@@ -37,6 +37,7 @@ docker compose exec app php bin/console app:about
 docker compose exec app php bin/console app:config:dump
 docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 docker compose exec app php bin/console app:health:check
 ```
 
@@ -48,6 +49,8 @@ HTTP checks:
 curl -i http://127.0.0.1:8081/
 curl -i http://127.0.0.1:8081/contact
 curl -i http://127.0.0.1:8081/preferences
+curl -i http://127.0.0.1:8081/login
+curl -i http://127.0.0.1:8081/admin
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
 ```

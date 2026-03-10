@@ -16,6 +16,7 @@ final readonly class PdoMigratorFactory
     {
         return new PdoMigrator($this->connection, [
             new Version202603020001(),
+            new Version202603100001(),
         ]);
     }
 }

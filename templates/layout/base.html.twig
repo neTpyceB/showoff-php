@@ -118,6 +118,8 @@
         <a href="/" data-active="{{ current_route == 'home' ? 'true' : 'false' }}">Home</a>
         <a href="/contact" data-active="{{ current_route == 'contact' ? 'true' : 'false' }}">Contact Form</a>
         <a href="/preferences" data-active="{{ current_route == 'preferences' ? 'true' : 'false' }}">Preferences</a>
+        <a href="/login" data-active="{{ current_route == 'login' ? 'true' : 'false' }}">Login</a>
+        <a href="/admin" data-active="{{ current_route == 'admin' ? 'true' : 'false' }}">Admin</a>
     </nav>
 
     {% for type, messages in flash_messages %}

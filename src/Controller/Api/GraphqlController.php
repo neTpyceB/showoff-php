@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Api\Graphql\GraphqlSchemaProvider;
+use App\Security\ApiTokenService;
 use GraphQL\Error\FormattedError;
 use GraphQL\GraphQL;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ final class GraphqlController extends AbstractController
 {
     public function __construct(
         private readonly GraphqlSchemaProvider $schemaProvider,
+        private readonly ApiTokenService $apiTokens,
     ) {}
 
     public function __invoke(Request $request): JsonResponse
@@ -38,6 +40,14 @@ final class GraphqlController extends AbstractController
                     ['message' => 'query is required.'],
                 ],
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if ($this->isMutation($query) && $this->apiTokens->userFromRequest($request) === null) {
+            return $this->json([
+                'errors' => [
+                    ['message' => 'Unauthorized. Bearer token required for mutations.'],
+                ],
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         $variables = $this->normalizeVariables($payload['variables'] ?? null);
@@ -118,5 +128,10 @@ final class GraphqlController extends AbstractController
         }
 
         return $normalized;
+    }
+
+    private function isMutation(string $query): bool
+    {
+        return str_contains(strtolower($query), 'mutation');
     }
 }
