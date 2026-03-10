@@ -2,15 +2,14 @@
 
 ## Scope
 
-This stage implements Symfony MVC foundation on top of the existing modular codebase:
+This stage implements public API foundations on top of the existing Symfony MVC codebase:
 
 - strict typing and modern PHP 8.5 conventions
-- Symfony Kernel + FrameworkBundle lifecycle
-- attribute-routed controllers in `src/Controller`
-- service wiring via `config/services.yaml`
-- Twig rendering via `templates/`
-- Symfony Validator-backed request DTO validation
-- thin controllers delegating business behavior to application/domain services
+- REST endpoints under `/api/v1/...`
+- GraphQL endpoint at `/api/graphql`
+- API request validation via Symfony Validator DTOs
+- GraphQL schema/resolvers mapped to application services
+- domain persistence/repositories reused across web and API surfaces
 
 ## Modules
 
@@ -46,6 +45,14 @@ Symfony application kernel and lifecycle integration.
 
 Framework controllers for home/contact/preferences flows.
 
+### `src/Controller/Api`
+
+REST and GraphQL HTTP entrypoints.
+
+### `src/Api`
+
+API layer request DTOs and GraphQL schema provider.
+
 ### `src/Application`
 
 Application services used by controllers.
@@ -60,4 +67,4 @@ Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
 ## Extension path
 
-Future stages can scale by adding bundles/services/events on top of this kernel without changing runtime entrypoints.
+Future stages can scale by versioning APIs (`/api/v2`) and extending GraphQL types/resolvers without rewriting domain/persistence layers.

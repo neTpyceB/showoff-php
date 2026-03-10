@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Symfony Framework Integration (MVC Foundation)` stage. This iteration migrates to Symfony Kernel lifecycle with controllers, services, Twig rendering, and validation.
+Strict-typed PHP 8.5 application for the `API Layer (REST + GraphQL Foundations)` stage. This iteration exposes domain capabilities through REST endpoints and GraphQL schema on top of Symfony MVC.
 
 ## Project structure
 
@@ -43,6 +43,7 @@ Strict-typed PHP 8.5 application for the `Symfony Framework Integration (MVC Fou
 ├── railway.toml
 ├── src
 │   ├── Application
+│   ├── Api
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
@@ -75,6 +76,8 @@ Open:
 http://127.0.0.1:8081/
 http://127.0.0.1:8081/contact
 http://127.0.0.1:8081/preferences
+http://127.0.0.1:8081/api/v1/contact-submissions
+POST http://127.0.0.1:8081/api/graphql
 ```
 
 Port overrides (if needed):
@@ -104,6 +107,8 @@ docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:health:check
+curl -i http://127.0.0.1:8081/api/v1/contact-submissions
+curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
 docker compose exec app php -m | grep pdo_mysql
 docker compose exec app php -m | grep pdo_sqlite
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
