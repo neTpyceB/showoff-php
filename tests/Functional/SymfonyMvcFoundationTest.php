@@ -6,6 +6,8 @@ namespace Showoff\Core\Tests\Functional;
 
 use App\Kernel;
 use Showoff\Core\Persistence\Migration\PdoMigrator;
+use Showoff\Core\Persistence\Migration\Version202603020001;
+use Showoff\Core\Persistence\Migration\Version202603100001;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -14,6 +16,7 @@ final class SymfonyMvcFoundationTest extends WebTestCase
     protected function setUp(): void
     {
         $client = static::createClient();
+        $client->disableReboot();
         $container = $client->getContainer();
         $this->runMigrations($container);
     }
@@ -24,7 +27,7 @@ final class SymfonyMvcFoundationTest extends WebTestCase
     protected static function createKernel(array $options = []): Kernel
     {
         $environment = isset($options['environment']) ? (string) $options['environment'] : 'test';
-        $debug = isset($options['debug']) ? (bool) $options['debug'] : true;
+        $debug = isset($options['debug']) ? (bool) $options['debug'] : false;
 
         return new Kernel($environment, $debug);
     }
@@ -63,11 +66,12 @@ final class SymfonyMvcFoundationTest extends WebTestCase
 
     private function runMigrations(ContainerInterface $container): void
     {
-        $migrator = $container->get(PdoMigrator::class);
-        if (!$migrator instanceof PdoMigrator) {
-            throw new \RuntimeException('Expected PdoMigrator service.');
+        $pdo = $container->get(\PDO::class);
+        if (!$pdo instanceof \PDO) {
+            throw new \RuntimeException('Expected PDO service.');
         }
 
+        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001()]);
         $migrator->migrate();
     }
 

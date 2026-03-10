@@ -4,6 +4,8 @@ framework:
   handle_all_throwables: true
   session:
     enabled: true
-    cookie_samesite: lax
+    cookie_secure: auto
+    cookie_httponly: true
+    cookie_samesite: strict
   validation:
     enabled: true

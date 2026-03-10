@@ -5,7 +5,12 @@ declare(strict_types=1);
 namespace Showoff\Core\Tests\Functional;
 
 use App\Kernel;
+use App\Security\PasswordHasher;
+use App\Security\Role;
+use App\Security\UserRepository;
 use Showoff\Core\Persistence\Migration\PdoMigrator;
+use Showoff\Core\Persistence\Migration\Version202603020001;
+use Showoff\Core\Persistence\Migration\Version202603100001;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,7 +20,10 @@ final class ApiLayerTest extends WebTestCase
     protected function setUp(): void
     {
         $client = static::createClient();
-        $this->runMigrations($client->getContainer());
+        $client->disableReboot();
+        $container = $client->getContainer();
+        $this->runMigrations($container);
+        $this->seedApiUser($container);
     }
 
     /**
@@ -24,7 +32,7 @@ final class ApiLayerTest extends WebTestCase
     protected static function createKernel(array $options = []): Kernel
     {
         $environment = isset($options['environment']) ? (string) $options['environment'] : 'test';
-        $debug = isset($options['debug']) ? (bool) $options['debug'] : true;
+        $debug = isset($options['debug']) ? (bool) $options['debug'] : false;
 
         return new Kernel($environment, $debug);
     }
@@ -50,7 +58,10 @@ final class ApiLayerTest extends WebTestCase
         $client->request(
             'POST',
             '/api/v1/contact-submissions',
-            server: ['CONTENT_TYPE' => 'application/json'],
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $this->issueAccessToken(self::requireClient()),
+            ],
             content: json_encode([
                 'name' => '',
                 'email' => 'invalid',
@@ -68,7 +79,10 @@ final class ApiLayerTest extends WebTestCase
         $client->request(
             'POST',
             '/api/v1/contact-submissions',
-            server: ['CONTENT_TYPE' => 'application/json'],
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $this->issueAccessToken(self::requireClient()),
+            ],
             content: json_encode([
                 'name' => 'Ada Lovelace',
                 'email' => 'ada@example.com',
@@ -115,7 +129,10 @@ final class ApiLayerTest extends WebTestCase
         $client->request(
             'POST',
             '/api/graphql',
-            server: ['CONTENT_TYPE' => 'application/json'],
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => 'Bearer ' . $this->issueAccessToken(self::requireClient()),
+            ],
             content: json_encode([
                 'query' => 'mutation Submit($input: SubmitContactSubmissionInput!) { submitContactSubmission(input: $input) { submission { id name email status } } }',
                 'variables' => [
@@ -142,11 +159,12 @@ final class ApiLayerTest extends WebTestCase
 
     private function runMigrations(ContainerInterface $container): void
     {
-        $migrator = $container->get(PdoMigrator::class);
-        if (!$migrator instanceof PdoMigrator) {
-            throw new \RuntimeException('Expected PdoMigrator service.');
+        $pdo = $container->get(\PDO::class);
+        if (!$pdo instanceof \PDO) {
+            throw new \RuntimeException('Expected PDO service.');
         }
 
+        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001()]);
         $migrator->migrate();
     }
 
@@ -158,6 +176,45 @@ final class ApiLayerTest extends WebTestCase
         }
 
         return $client;
+    }
+
+    private function issueAccessToken(KernelBrowser $client): string
+    {
+        $client->request(
+            'POST',
+            '/api/v1/auth/token',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'email' => 'api@example.com',
+                'password' => 'VeryStrongPassword123!',
+            ], JSON_THROW_ON_ERROR),
+        );
+
+        self::assertResponseStatusCodeSame(201);
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, flags: JSON_THROW_ON_ERROR);
+        $root = $this->assertJsonObject($payload);
+        $data = $this->assertArrayValue($root, 'data');
+
+        return $this->assertStringValue($data, 'accessToken');
+    }
+
+    private function seedApiUser(ContainerInterface $container): void
+    {
+        $users = $container->get(UserRepository::class);
+        $hasher = $container->get(PasswordHasher::class);
+        if (!$users instanceof UserRepository || !$hasher instanceof PasswordHasher) {
+            throw new \RuntimeException('Security services unavailable.');
+        }
+
+        if ($users->findByEmail('api@example.com') !== null) {
+            return;
+        }
+
+        $users->create(
+            'api@example.com',
+            $hasher->hash('VeryStrongPassword123!'),
+            Role::USER,
+        );
     }
 
     /**

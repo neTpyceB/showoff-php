@@ -17,6 +17,7 @@ docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count } }"}'
 ```

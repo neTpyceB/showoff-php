@@ -2,14 +2,15 @@
 
 ## Scope
 
-This stage implements public API foundations on top of the existing Symfony MVC codebase:
+This stage implements security architecture foundations on top of the existing Symfony MVC + API codebase:
 
 - strict typing and modern PHP 8.5 conventions
-- REST endpoints under `/api/v1/...`
-- GraphQL endpoint at `/api/graphql`
-- API request validation via Symfony Validator DTOs
-- GraphQL schema/resolvers mapped to application services
-- domain persistence/repositories reused across web and API surfaces
+- session-based web authentication (`/login`, `/logout`)
+- role-based authorization (`admin`, `user`)
+- bearer token API protection for write operations
+- encrypted persistence for sensitive user attributes
+- password hashing with Argon2id
+- dedicated security migration for users and API tokens
 
 ## Modules
 
@@ -53,6 +54,10 @@ REST and GraphQL HTTP entrypoints.
 
 API layer request DTOs and GraphQL schema provider.
 
+### `src/Security`
+
+Authentication, authorization, role model, token issuance/validation, and crypto utilities.
+
 ### `src/Application`
 
 Application services used by controllers.
@@ -67,4 +72,4 @@ Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
 ## Extension path
 
-Future stages can scale by versioning APIs (`/api/v2`) and extending GraphQL types/resolvers without rewriting domain/persistence layers.
+Future stages can scale by adding policy abstractions (voters/permissions), MFA, and external identity providers without rewriting domain/persistence layers.

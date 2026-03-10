@@ -1,0 +1,20 @@
+{% extends 'layout/base.html.twig' %}
+
+{% block content %}
+    <section class="grid">
+        <div class="stack">
+            <h1>Admin panel</h1>
+            <p class="meta">Restricted area protected by authenticated session and admin role checks.</p>
+        </div>
+
+        <div class="stack">
+            <strong>Signed in as:</strong>
+            <span>{{ email }}</span>
+            <span class="meta">Role: {{ role }}</span>
+        </div>
+
+        <form method="post" action="/logout">
+            <button type="submit">Logout</button>
+        </form>
+    </section>
+{% endblock %}

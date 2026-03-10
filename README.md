@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `API Layer (REST + GraphQL Foundations)` stage. This iteration exposes domain capabilities through REST endpoints and GraphQL schema on top of Symfony MVC.
+Strict-typed PHP 8.5 application for the `Application Security Architecture` stage. This iteration adds authentication, authorization, roles, secure sessions, token-protected APIs, and encryption utilities.
 
 ## Project structure
 
@@ -47,6 +47,7 @@ Strict-typed PHP 8.5 application for the `API Layer (REST + GraphQL Foundations)
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
+│   ├── Security
 │   └── Kernel.php
 ├── templates
 │   ├── layout
@@ -78,6 +79,8 @@ http://127.0.0.1:8081/contact
 http://127.0.0.1:8081/preferences
 http://127.0.0.1:8081/api/v1/contact-submissions
 POST http://127.0.0.1:8081/api/graphql
+http://127.0.0.1:8081/login
+http://127.0.0.1:8081/admin
 ```
 
 Port overrides (if needed):
@@ -106,6 +109,7 @@ composer cs:check
 docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/console app:database:migrate
+docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 docker compose exec app php bin/console app:health:check
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'

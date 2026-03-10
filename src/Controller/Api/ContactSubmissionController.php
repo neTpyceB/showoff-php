@@ -6,6 +6,7 @@ namespace App\Controller\Api;
 
 use App\Api\Rest\Request\CreateContactSubmissionRequest;
 use App\Application\Contact\ApiContactSubmissionService;
+use App\Security\ApiTokenService;
 use Showoff\Core\Domain\Contact\ContactSubmission;
 use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +23,7 @@ final class ContactSubmissionController extends AbstractController
     public function __construct(
         private readonly ContactSubmissionRepository $submissionRepository,
         private readonly ApiContactSubmissionService $submissionService,
+        private readonly ApiTokenService $apiTokens,
         private readonly ValidatorInterface $validator,
     ) {}
 
@@ -39,6 +41,15 @@ final class ContactSubmissionController extends AbstractController
     #[Route('', name: 'api_contact_submission_store', methods: ['POST'])]
     public function store(Request $request): JsonResponse
     {
+        $apiUser = $this->apiTokens->userFromRequest($request);
+        if ($apiUser === null) {
+            return $this->json([
+                'errors' => [
+                    ['message' => 'Unauthorized. Bearer token required.'],
+                ],
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
         $payload = $this->decodePayload($request);
         if ($payload === null) {
             return $this->json([
