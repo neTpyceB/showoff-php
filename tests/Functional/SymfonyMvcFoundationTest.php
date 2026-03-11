@@ -8,6 +8,7 @@ use App\Kernel;
 use Showoff\Core\Persistence\Migration\PdoMigrator;
 use Showoff\Core\Persistence\Migration\Version202603020001;
 use Showoff\Core\Persistence\Migration\Version202603100001;
+use Showoff\Core\Persistence\Migration\Version202603110001;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,7 +45,9 @@ final class SymfonyMvcFoundationTest extends WebTestCase
     public function testItValidatesContactFormInput(): void
     {
         $client = self::requireClient();
+        $token = $this->csrfToken($client, '/contact');
         $client->request('POST', '/contact', [
+            '_csrf_token' => $token,
             'name' => '',
             'email' => 'invalid',
             'message' => 'short',
@@ -57,7 +60,9 @@ final class SymfonyMvcFoundationTest extends WebTestCase
     public function testItAcceptsValidPreferenceSubmission(): void
     {
         $client = self::requireClient();
+        $token = $this->csrfToken($client, '/preferences');
         $client->request('POST', '/preferences', [
+            '_csrf_token' => $token,
             'theme' => 'dark',
         ]);
 
@@ -71,7 +76,7 @@ final class SymfonyMvcFoundationTest extends WebTestCase
             throw new \RuntimeException('Expected PDO service.');
         }
 
-        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001()]);
+        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001(), new Version202603110001()]);
         $migrator->migrate();
     }
 
@@ -83,5 +88,17 @@ final class SymfonyMvcFoundationTest extends WebTestCase
         }
 
         return $client;
+    }
+
+    private function csrfToken(\Symfony\Bundle\FrameworkBundle\KernelBrowser $client, string $path): string
+    {
+        $crawler = $client->request('GET', $path);
+        $input = $crawler->filter('input[name="_csrf_token"]')->first();
+        self::assertGreaterThan(0, $input->count());
+
+        $token = $input->attr('value');
+        self::assertIsString($token);
+
+        return $token;
     }
 }

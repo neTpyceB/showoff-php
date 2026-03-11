@@ -21,6 +21,8 @@ docker compose exec app php bin/console app:security:create-user admin@example.c
 docker compose exec app php bin/console app:worker:contact-events --limit=50
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count } }"}'
+curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag>"'
+curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Performance stage payload."}'
 ```
 
 ## Environment
@@ -62,6 +64,21 @@ Key variables:
 - `DATABASE_USER`
 - `DATABASE_PASSWORD`
 - `DATABASE_CHARSET`
+- `REDIS_DSN`
+- `RABBITMQ_HOST`
+- `RABBITMQ_PORT`
+- `RABBITMQ_USER`
+- `RABBITMQ_PASSWORD`
+- `RABBITMQ_VHOST`
+- `RABBITMQ_QUEUE`
+- `PERFORMANCE_HTTP_CACHE_MAX_AGE`
+- `PERFORMANCE_IDEMPOTENCY_TTL_SECONDS`
+- `PERFORMANCE_LOCK_TTL_SECONDS`
+- `PERFORMANCE_SLOW_REQUEST_MS`
+- `SECURITY_LOGIN_MAX_ATTEMPTS`
+- `SECURITY_LOGIN_WINDOW_SECONDS`
+- `SECURITY_API_TOKEN_MAX_ATTEMPTS`
+- `SECURITY_API_TOKEN_WINDOW_SECONDS`
 
 ## Testing policy
 

@@ -29,5 +29,13 @@
         <server name="RABBITMQ_PASSWORD" value="guest"/>
         <server name="RABBITMQ_VHOST" value="/"/>
         <server name="RABBITMQ_QUEUE" value="contact_submission_events"/>
+        <server name="PERFORMANCE_HTTP_CACHE_MAX_AGE" value="30"/>
+        <server name="PERFORMANCE_IDEMPOTENCY_TTL_SECONDS" value="600"/>
+        <server name="PERFORMANCE_LOCK_TTL_SECONDS" value="15"/>
+        <server name="PERFORMANCE_SLOW_REQUEST_MS" value="250"/>
+        <server name="SECURITY_LOGIN_MAX_ATTEMPTS" value="5"/>
+        <server name="SECURITY_LOGIN_WINDOW_SECONDS" value="900"/>
+        <server name="SECURITY_API_TOKEN_MAX_ATTEMPTS" value="10"/>
+        <server name="SECURITY_API_TOKEN_WINDOW_SECONDS" value="900"/>
     </php>
 </phpunit>

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Api\Graphql\GraphqlSchemaProvider;
+use App\Performance\Http\JsonHttpCacheService;
+use App\Performance\Idempotency\IdempotencyLockException;
+use App\Performance\Idempotency\IdempotencyService;
 use App\Security\ApiTokenService;
 use GraphQL\Error\FormattedError;
 use GraphQL\GraphQL;
@@ -20,6 +23,8 @@ final class GraphqlController extends AbstractController
     public function __construct(
         private readonly GraphqlSchemaProvider $schemaProvider,
         private readonly ApiTokenService $apiTokens,
+        private readonly JsonHttpCacheService $httpCache,
+        private readonly IdempotencyService $idempotency,
     ) {}
 
     public function __invoke(Request $request): JsonResponse
@@ -42,7 +47,8 @@ final class GraphqlController extends AbstractController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ($this->isMutation($query) && $this->apiTokens->userFromRequest($request) === null) {
+        $isMutation = $this->isMutation($query);
+        if ($isMutation && $this->apiTokens->userFromRequest($request) === null) {
             return $this->json([
                 'errors' => [
                     ['message' => 'Unauthorized. Bearer token required for mutations.'],
@@ -57,23 +63,40 @@ final class GraphqlController extends AbstractController
             $operationName = null;
         }
 
-        try {
-            $result = GraphQL::executeQuery(
-                $this->schemaProvider->schema(),
-                $query,
-                variableValues: $variables,
-                operationName: $operationName,
+        if (!$isMutation) {
+            return $this->httpCache->createCacheableResponse(
+                $request,
+                $this->executeGraphql($query, $variables, $operationName),
             );
-            $output = $result->toArray();
-        } catch (\Throwable $exception) {
-            $output = [
-                'errors' => [
-                    FormattedError::createFromException($exception),
-                ],
-            ];
         }
 
-        return new JsonResponse($output);
+        try {
+            $idempotencyKey = $this->idempotencyKey($request);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json([
+                'errors' => [
+                    ['message' => $exception->getMessage()],
+                ],
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $runMutation = fn(): JsonResponse => new JsonResponse(
+            $this->executeGraphql($query, $variables, $operationName),
+        );
+
+        if ($idempotencyKey === null) {
+            return $runMutation();
+        }
+
+        try {
+            return $this->idempotency->execute('graphql.mutation', $idempotencyKey, $runMutation);
+        } catch (IdempotencyLockException) {
+            return $this->json([
+                'errors' => [
+                    ['message' => 'A request with this Idempotency-Key is currently in progress.'],
+                ],
+            ], Response::HTTP_CONFLICT);
+        }
     }
 
     /**
@@ -133,5 +156,49 @@ final class GraphqlController extends AbstractController
     private function isMutation(string $query): bool
     {
         return str_contains(strtolower($query), 'mutation');
+    }
+
+    /**
+     * @param array<string, mixed> $variables
+     *
+     * @return array<string, mixed>
+     */
+    private function executeGraphql(string $query, array $variables, ?string $operationName): array
+    {
+        try {
+            $result = GraphQL::executeQuery(
+                $this->schemaProvider->schema(),
+                $query,
+                variableValues: $variables,
+                operationName: $operationName,
+            );
+
+            return $this->stringKeyArray($result->toArray());
+        } catch (\Throwable $exception) {
+            return [
+                'errors' => [
+                    FormattedError::createFromException($exception),
+                ],
+            ];
+        }
+    }
+
+    private function idempotencyKey(Request $request): ?string
+    {
+        $header = $request->headers->get('Idempotency-Key');
+        if ($header === null) {
+            return null;
+        }
+
+        $key = trim($header);
+        if ($key === '') {
+            throw new \InvalidArgumentException('Idempotency-Key header must not be empty.');
+        }
+
+        if (strlen($key) > 128) {
+            throw new \InvalidArgumentException('Idempotency-Key header must not exceed 128 characters.');
+        }
+
+        return $key;
     }
 }

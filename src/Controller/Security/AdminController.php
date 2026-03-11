@@ -6,6 +6,7 @@ namespace App\Controller\Security;
 
 use App\Security\AuthorizationService;
 use App\Security\AuthService;
+use App\Security\Csrf\FormCsrfTokenManager;
 use App\Security\Role;
 use Showoff\Core\Config\AppConfig;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,6 +19,7 @@ final class AdminController extends AbstractController
     public function __construct(
         private readonly AuthService $authService,
         private readonly AuthorizationService $authorization,
+        private readonly FormCsrfTokenManager $csrfTokens,
     ) {}
 
     #[Route('/admin', name: 'app_admin', methods: ['GET'])]
@@ -36,6 +38,7 @@ final class AdminController extends AbstractController
             'flash_messages' => [],
             'email' => $user->email,
             'role' => $user->role->value,
+            'logout_csrf_token' => $this->csrfTokens->tokenFor($request, 'logout_form'),
         ]);
     }
 }

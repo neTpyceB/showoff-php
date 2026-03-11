@@ -7,6 +7,9 @@ namespace App\Controller\Api;
 use App\Api\Rest\Request\CreateContactSubmissionRequest;
 use App\Application\Contact\ApiContactSubmissionService;
 use App\Application\Contact\ContactSubmissionStatsService;
+use App\Performance\Http\JsonHttpCacheService;
+use App\Performance\Idempotency\IdempotencyLockException;
+use App\Performance\Idempotency\IdempotencyService;
 use App\Security\ApiTokenService;
 use Showoff\Core\Domain\Contact\ContactSubmission;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,12 +28,14 @@ final class ContactSubmissionController extends AbstractController
         private readonly ApiContactSubmissionService $submissionService,
         private readonly ApiTokenService $apiTokens,
         private readonly ValidatorInterface $validator,
+        private readonly JsonHttpCacheService $httpCache,
+        private readonly IdempotencyService $idempotency,
     ) {}
 
     #[Route('', name: 'api_contact_submission_index', methods: ['GET'])]
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return $this->json([
+        return $this->httpCache->createCacheableResponse($request, [
             'data' => $this->stats->get(),
         ]);
     }
@@ -71,16 +76,45 @@ final class ContactSubmissionController extends AbstractController
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $submission = $this->submissionService->submit(
-            name: $form->name,
-            email: $form->email,
-            message: $form->message,
-            source: 'rest_api',
-        );
+        try {
+            $idempotencyKey = $this->idempotencyKey($request);
+        } catch (\InvalidArgumentException $exception) {
+            return $this->json([
+                'errors' => [
+                    [
+                        'field' => 'Idempotency-Key',
+                        'message' => $exception->getMessage(),
+                    ],
+                ],
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
-        return $this->json([
-            'data' => $this->normalizeSubmission($submission),
-        ], Response::HTTP_CREATED);
+        $store = function () use ($form): JsonResponse {
+            $submission = $this->submissionService->submit(
+                name: $form->name,
+                email: $form->email,
+                message: $form->message,
+                source: 'rest_api',
+            );
+
+            return $this->json([
+                'data' => $this->normalizeSubmission($submission),
+            ], Response::HTTP_CREATED);
+        };
+
+        if ($idempotencyKey === null) {
+            return $store();
+        }
+
+        try {
+            return $this->idempotency->execute('rest.contact_submission.store', $idempotencyKey, $store);
+        } catch (IdempotencyLockException) {
+            return $this->json([
+                'errors' => [
+                    ['message' => 'A request with this Idempotency-Key is currently in progress.'],
+                ],
+            ], Response::HTTP_CONFLICT);
+        }
     }
 
     /**
@@ -168,5 +202,24 @@ final class ContactSubmissionController extends AbstractController
         }
 
         return $normalized;
+    }
+
+    private function idempotencyKey(Request $request): ?string
+    {
+        $header = $request->headers->get('Idempotency-Key');
+        if ($header === null) {
+            return null;
+        }
+
+        $key = trim($header);
+        if ($key === '') {
+            throw new \InvalidArgumentException('Idempotency-Key header must not be empty.');
+        }
+
+        if (strlen($key) > 128) {
+            throw new \InvalidArgumentException('Idempotency-Key header must not exceed 128 characters.');
+        }
+
+        return $key;
     }
 }

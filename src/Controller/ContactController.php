@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Application\Contact\ContactSubmissionApplicationService;
 use App\Http\Form\ContactRequest;
+use App\Security\Csrf\FormCsrfTokenManager;
 use Showoff\Core\Config\AppConfig;
 use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,6 +25,7 @@ final class ContactController extends AbstractController
         private readonly ContactSubmissionApplicationService $submissionService,
         private readonly ContactSubmissionRepository $submissionRepository,
         private readonly ValidatorInterface $validator,
+        private readonly FormCsrfTokenManager $csrfTokens,
     ) {}
 
     #[Route('/contact', name: 'app_contact', methods: ['GET', 'POST'])]
@@ -34,9 +36,20 @@ final class ContactController extends AbstractController
             $form->name = trim($request->request->getString('name'));
             $form->email = trim($request->request->getString('email'));
             $form->message = trim($request->request->getString('message'));
-            $violations = $this->validator->validate($form);
+            $errors = [];
 
-            if (count($violations) === 0) {
+            if (!$this->csrfTokens->isValid(
+                $request,
+                'contact_form',
+                $request->request->getString('_csrf_token'),
+            )) {
+                $errors['_csrf_token'] = 'Invalid form token. Refresh the page and try again.';
+            }
+
+            $violations = $this->validator->validate($form);
+            $errors = array_replace($errors, $this->errors($violations));
+
+            if ($errors === []) {
                 $this->submissionService->submit($form, $request);
                 $this->addFlash('success', 'Contact form submitted successfully.');
 
@@ -45,7 +58,7 @@ final class ContactController extends AbstractController
                     name: 'last_contact_email',
                     value: $form->email,
                     secure: $config->sessionCookieSecure,
-                    httpOnly: false,
+                    httpOnly: true,
                     sameSite: Cookie::SAMESITE_LAX,
                 ));
 
@@ -56,7 +69,7 @@ final class ContactController extends AbstractController
                 'app_name' => $config->appName,
                 'current_route' => 'contact',
                 'flash_messages' => $this->flashMessages($request),
-                'errors' => $this->errors($violations),
+                'errors' => $errors,
                 'values' => [
                     'name' => $form->name,
                     'email' => $form->email,
@@ -64,6 +77,7 @@ final class ContactController extends AbstractController
                 ],
                 'submission_count' => $this->submissionRepository->countAll(),
                 'last_contact_email' => $request->cookies->get('last_contact_email'),
+                'csrf_token' => $this->csrfTokens->tokenFor($request, 'contact_form'),
             ], new Response(status: Response::HTTP_UNPROCESSABLE_ENTITY));
         }
 
@@ -79,6 +93,7 @@ final class ContactController extends AbstractController
             ],
             'submission_count' => $this->submissionRepository->countAll(),
             'last_contact_email' => $request->cookies->get('last_contact_email'),
+            'csrf_token' => $this->csrfTokens->tokenFor($request, 'contact_form'),
         ]);
     }
 
