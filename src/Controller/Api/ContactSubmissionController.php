@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Controller\Api;
 
 use App\Api\Rest\Request\CreateContactSubmissionRequest;
-use App\Application\Contact\ApiContactSubmissionService;
-use App\Application\Contact\ContactSubmissionStatsService;
+use App\Module\Contact\Api\ContactPublicApi;
+use App\Module\Contact\Api\ContactSubmissionInput;
 use App\Performance\Http\JsonHttpCacheService;
 use App\Performance\Idempotency\IdempotencyLockException;
 use App\Performance\Idempotency\IdempotencyService;
 use App\Security\ApiTokenService;
-use Showoff\Core\Domain\Contact\ContactSubmission;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,8 +23,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ContactSubmissionController extends AbstractController
 {
     public function __construct(
-        private readonly ContactSubmissionStatsService $stats,
-        private readonly ApiContactSubmissionService $submissionService,
+        private readonly ContactPublicApi $contactApi,
         private readonly ApiTokenService $apiTokens,
         private readonly ValidatorInterface $validator,
         private readonly JsonHttpCacheService $httpCache,
@@ -36,7 +34,7 @@ final class ContactSubmissionController extends AbstractController
     public function index(Request $request): JsonResponse
     {
         return $this->httpCache->createCacheableResponse($request, [
-            'data' => $this->stats->get(),
+            'data' => $this->contactApi->stats()->toArray(),
         ]);
     }
 
@@ -90,15 +88,15 @@ final class ContactSubmissionController extends AbstractController
         }
 
         $store = function () use ($form): JsonResponse {
-            $submission = $this->submissionService->submit(
+            $submission = $this->contactApi->submit(new ContactSubmissionInput(
                 name: $form->name,
                 email: $form->email,
                 message: $form->message,
                 source: 'rest_api',
-            );
+            ));
 
             return $this->json([
-                'data' => $this->normalizeSubmission($submission),
+                'data' => $submission->toArray(),
             ], Response::HTTP_CREATED);
         };
 
@@ -154,25 +152,6 @@ final class ContactSubmissionController extends AbstractController
         }
 
         return $errors;
-    }
-
-    /**
-     * @return array{id: int, name: string, email: string, message: string, status: string, submittedAt: string}|null
-     */
-    private function normalizeSubmission(?ContactSubmission $submission): ?array
-    {
-        if ($submission === null || $submission->id === null) {
-            return null;
-        }
-
-        return [
-            'id' => $submission->id->value,
-            'name' => $submission->name->value,
-            'email' => $submission->email->value,
-            'message' => $submission->message->value,
-            'status' => $submission->status->value,
-            'submittedAt' => $submission->submittedAt->format(\DateTimeInterface::ATOM),
-        ];
     }
 
     /**

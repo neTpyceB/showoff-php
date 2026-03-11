@@ -39,6 +39,7 @@ docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 docker compose exec app php bin/console app:worker:contact-events --limit=50
+docker compose exec app php bin/console app:showcase:pipeline
 docker compose exec app php bin/console app:health:check
 ```
 
@@ -56,7 +57,13 @@ curl -i http://127.0.0.1:8081/health/live
 curl -i http://127.0.0.1:8081/health/ready
 curl -i http://127.0.0.1:8081/metrics
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
+curl -i http://127.0.0.1:8081/api/v1/analytics/contact-submissions
+curl -i http://127.0.0.1:8081/api/v1/showcase/report
+curl -i http://127.0.0.1:8081/api/v1/showcase/diagnostics -H 'X-Showcase-Roles: ROLE_ADMIN'
+curl -i -X POST http://127.0.0.1:8081/api/v1/showcase/audit -H 'Content-Type: application/json' -d '{"action":"pipeline.started"}'
+curl -i -X POST http://127.0.0.1:8081/api/v1/showcase/settings/validate -H 'Content-Type: application/json' -d '{"code":"valid-code-101","notes":"ok"}'
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
+curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionProcessing { processed lastEmail lastOccurredAt } }"}'
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag-from-first-response>"'
 curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Performance stage payload."}'
 ```
@@ -75,15 +82,15 @@ docker compose exec rabbitmq rabbitmqctl list_queues
 
 The app container runs `php-fpm` as PID 1. Nginx is the public entrypoint.
 
-## Railway
+## Realtime (Mercure)
 
-The repository is Dockerfile-driven and includes `railway.toml`.
+Realtime update publishing is disabled unless `REALTIME_MERCURE_HUB_URL` is configured.
 
-Required GitHub secrets for automated Railway deploy workflow:
+Required env for publishing:
 
-- `RAILWAY_TOKEN`
-- `RAILWAY_PROJECT_ID`
-- `RAILWAY_ENVIRONMENT_ID`
-- `RAILWAY_SERVICE_NAME` (optional)
+- `REALTIME_MERCURE_HUB_URL`
+- `REALTIME_MERCURE_JWT`
+- `REALTIME_CONTACT_TOPIC`
+- `REALTIME_PUBLISH_TIMEOUT_MS`
 
-Railway healthcheck path is `/health/live`.
+Publish path follows Mercure hub endpoint, typically `/.well-known/mercure`.

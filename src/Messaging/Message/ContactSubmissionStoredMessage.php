@@ -6,6 +6,9 @@ namespace App\Messaging\Message;
 
 final readonly class ContactSubmissionStoredMessage
 {
+    public const EVENT_TYPE = 'contact.submission.stored';
+    public const EVENT_VERSION = 1;
+
     public function __construct(
         public int $submissionId,
         public string $email,
@@ -16,6 +19,8 @@ final readonly class ContactSubmissionStoredMessage
     public function toJson(): string
     {
         return json_encode([
+            'eventType' => self::EVENT_TYPE,
+            'eventVersion' => self::EVENT_VERSION,
             'submissionId' => $this->submissionId,
             'email' => $this->email,
             'source' => $this->source,

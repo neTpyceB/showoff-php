@@ -2,15 +2,14 @@
 
 ## Scope
 
-This stage implements DevOps, CI/CD, and production deployment foundations:
+This stage implements advanced Symfony framework showcase foundations:
 
 - strict typing and modern PHP 8.5 conventions
-- multi-stage Docker image strategy (development and production targets)
-- GitHub Actions quality and container build pipelines
-- Railway deployment workflow and service configuration
-- runtime observability endpoints (`/health/live`, `/health/ready`, `/metrics`)
-- structured request logging with per-request correlation IDs
-- request-level telemetry counters for monitoring ingestion
+- custom bundle + dependency injection extension + compiler pass
+- tagged service processing pipeline and custom console command
+- request/response kernel events and decorated HTTP kernel middleware
+- custom validator constraint + voter + form type and form extension
+- serializer normalizer customization and Messenger message handling
 
 ## Modules
 
@@ -70,6 +69,10 @@ Metrics aggregation and monitoring payload generation.
 
 Message contracts, RabbitMQ publisher, queue consumer, and event handlers.
 
+### `src/Realtime`
+
+Realtime publisher abstraction and Mercure-ready adapter.
+
 ### `src/Cache` and `src/Infrastructure/Cache`
 
 Cache abstraction with Redis adapter (plus test in-memory adapter).
@@ -86,6 +89,14 @@ Idempotency orchestration, JSON HTTP cache responder, and profiling/logging tele
 
 Application services used by controllers.
 
+### `src/Module`
+
+Bounded module public APIs and implementation adapters (`Contact`, `Analytics`).
+
+### `src/Showcase`
+
+Dedicated advanced Symfony showcase module with bundle internals, tagged processors, security voter, form extension, serializer normalizer, and Messenger integration.
+
 ### `src/Http/Form`
 
 Request DTOs with Symfony validation constraints.
@@ -94,14 +105,6 @@ Request DTOs with Symfony validation constraints.
 
 Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
-### `.github/workflows`
-
-Quality gate pipeline (`ci.yml`) including Docker production image build/push.
-
-### `railway.toml`
-
-Railway deployment runtime contract, healthcheck path, and startup command.
-
 ## Extension path
 
-Future stages can scale by adding OpenTelemetry exporters, centralized log sinks, canary deploys, and rollback automation.
+Future stages can scale by extracting the showcase bundle into a reusable package and adding reusable recipes for modular Symfony platform teams.

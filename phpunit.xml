@@ -35,6 +35,10 @@
         <server name="PERFORMANCE_SLOW_REQUEST_MS" value="250"/>
         <server name="OBSERVABILITY_STRUCTURED_LOGGING_ENABLED" value="false"/>
         <server name="OBSERVABILITY_METRICS_TOKEN" value=""/>
+        <server name="REALTIME_MERCURE_HUB_URL" value=""/>
+        <server name="REALTIME_MERCURE_JWT" value=""/>
+        <server name="REALTIME_CONTACT_TOPIC" value="/realtime/contact-submissions"/>
+        <server name="REALTIME_PUBLISH_TIMEOUT_MS" value="10"/>
         <server name="SECURITY_LOGIN_MAX_ATTEMPTS" value="5"/>
         <server name="SECURITY_LOGIN_WINDOW_SECONDS" value="900"/>
         <server name="SECURITY_API_TOKEN_MAX_ATTEMPTS" value="10"/>
