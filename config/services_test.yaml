@@ -2,5 +2,8 @@ services:
   App\Infrastructure\Cache\ArrayCacheStore: ~
   App\Cache\CacheStore: '@App\Infrastructure\Cache\ArrayCacheStore'
 
+  App\Infrastructure\Lock\ArrayRequestLockManager: ~
+  App\Concurrency\RequestLockManager: '@App\Infrastructure\Lock\ArrayRequestLockManager'
+
   App\Messaging\Publisher\NullMessagePublisher: ~
   App\Messaging\Publisher\MessagePublisher: '@App\Messaging\Publisher\NullMessagePublisher'

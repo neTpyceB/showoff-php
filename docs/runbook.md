@@ -54,6 +54,8 @@ curl -i http://127.0.0.1:8081/login
 curl -i http://127.0.0.1:8081/admin
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
+curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag-from-first-response>"'
+curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Performance stage payload."}'
 ```
 
 Container inspection:
@@ -63,6 +65,7 @@ docker compose ps
 docker compose exec app sh
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
 docker compose exec db mysql -ushowoff -pshowoff -Dshowoff -e 'SHOW TABLES;'
+docker compose exec db mysql -ushowoff -pshowoff -Dshowoff -e 'SHOW INDEX FROM contact_submissions;'
 docker compose exec redis redis-cli ping
 docker compose exec rabbitmq rabbitmqctl list_queues
 ```

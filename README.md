@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Async Processing, Messaging & Caching` stage. This iteration adds RabbitMQ-driven background workflows, Redis caching, and queue worker processing.
+Strict-typed PHP 8.5 application for the `Performance Engineering & Scalability` stage. This iteration adds request profiling, HTTP caching, idempotent write handling with distributed locks, and DB index optimization.
 
 ## Project structure
 
@@ -45,9 +45,11 @@ Strict-typed PHP 8.5 application for the `Async Processing, Messaging & Caching`
 │   ├── Application
 │   ├── Api
 │   ├── Cache
+│   ├── Concurrency
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
+│   ├── Performance
 │   ├── Messaging
 │   ├── Security
 │   └── Kernel.php
@@ -116,6 +118,8 @@ docker compose exec app php bin/console app:worker:contact-events --limit=50
 docker compose exec app php bin/console app:health:check
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
+curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag-from-previous-response>"'
+curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Idempotency test payload for scalability stage."}'
 docker compose exec app php -m | grep pdo_mysql
 docker compose exec app php -m | grep pdo_sqlite
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
@@ -147,3 +151,5 @@ More detail lives in:
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/development.md`](docs/development.md)
 - [`docs/runbook.md`](docs/runbook.md)
+- [`docs/security-audit.md`](docs/security-audit.md)
+- [`docs/security-roadmap.md`](docs/security-roadmap.md)

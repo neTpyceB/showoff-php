@@ -51,7 +51,7 @@ final readonly class PdoContactSubmissionRepository implements ContactSubmission
     public function latest(): ?ContactSubmission
     {
         $statement = $this->connection->query(
-            'SELECT id, name, email, message, status, submitted_at FROM contact_submissions ORDER BY id DESC LIMIT 1',
+            'SELECT id, name, email, message, status, submitted_at FROM contact_submissions ORDER BY submitted_at DESC, id DESC LIMIT 1',
         );
         if ($statement === false) {
             throw new \RuntimeException('Unable to query the latest contact submission.');

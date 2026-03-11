@@ -2,14 +2,14 @@
 
 ## Scope
 
-This stage implements async processing, messaging, and caching foundations:
+This stage implements performance and scalability foundations:
 
 - strict typing and modern PHP 8.5 conventions
-- Redis-backed cache abstraction for API submission stats
-- cache invalidation on writes through application workflow service
-- RabbitMQ message publishing after contact submission writes
-- queue consumer + worker command for background processing
-- asynchronous handler updating analytics cache keys
+- request-level profiling via Symfony kernel events
+- HTTP response caching with ETag and conditional requests
+- idempotent API writes backed by lock-based concurrency control
+- Redis-backed lock and cache implementations with test-safe in-memory adapters
+- migration-driven database index tuning for read-heavy contact submission queries
 
 ## Modules
 
@@ -65,6 +65,14 @@ Message contracts, RabbitMQ publisher, queue consumer, and event handlers.
 
 Cache abstraction with Redis adapter (plus test in-memory adapter).
 
+### `src/Concurrency` and `src/Infrastructure/Lock`
+
+Lock abstraction with Redis and in-memory implementations for idempotent, concurrency-safe write handling.
+
+### `src/Performance`
+
+Idempotency orchestration, JSON HTTP cache responder, and request profiling subscriber.
+
 ### `src/Application`
 
 Application services used by controllers.
@@ -79,4 +87,4 @@ Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
 ## Extension path
 
-Future stages can scale by adding multiple queues/exchanges, retry/dead-letter policies, and richer cache domains.
+Future stages can scale by adding read replicas, advanced query telemetry, adaptive cache TTL policies, and distributed tracing integration.

@@ -40,20 +40,25 @@ final readonly class ApiTokenService
     public function userFromRequest(Request $request): ?User
     {
         $authorization = $request->headers->get('Authorization');
-        if (!is_string($authorization) || !str_starts_with($authorization, 'Bearer ')) {
+        if (!is_string($authorization)) {
             return null;
         }
 
-        $token = trim(substr($authorization, 7));
-        if ($token === '') {
+        if (preg_match('/^Bearer\s+([A-Fa-f0-9]{64})$/', trim($authorization), $matches) !== 1) {
             return null;
         }
+
+        $token = $matches[1];
 
         return $this->userFromToken($token);
     }
 
     public function userFromToken(string $token): ?User
     {
+        if (preg_match('/^[A-Fa-f0-9]{64}$/', $token) !== 1) {
+            return null;
+        }
+
         $statement = $this->connection->prepare(
             'SELECT user_id FROM api_access_tokens
              WHERE token_hash = :token_hash

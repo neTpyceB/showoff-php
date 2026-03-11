@@ -1,3 +1,13 @@
+parameters:
+  app.performance.http_cache_max_age: '%env(int:PERFORMANCE_HTTP_CACHE_MAX_AGE)%'
+  app.performance.idempotency_ttl: '%env(int:PERFORMANCE_IDEMPOTENCY_TTL_SECONDS)%'
+  app.performance.idempotency_lock_ttl: '%env(int:PERFORMANCE_LOCK_TTL_SECONDS)%'
+  app.performance.slow_request_ms: '%env(int:PERFORMANCE_SLOW_REQUEST_MS)%'
+  app.security.login_max_attempts: '%env(int:SECURITY_LOGIN_MAX_ATTEMPTS)%'
+  app.security.login_window_seconds: '%env(int:SECURITY_LOGIN_WINDOW_SECONDS)%'
+  app.security.api_token_max_attempts: '%env(int:SECURITY_API_TOKEN_MAX_ATTEMPTS)%'
+  app.security.api_token_window_seconds: '%env(int:SECURITY_API_TOKEN_WINDOW_SECONDS)%'
+
 services:
   _defaults:
     autowire: true
@@ -58,6 +68,34 @@ services:
     arguments:
       $dsn: '%env(REDIS_DSN)%'
   App\Cache\CacheStore: '@App\Infrastructure\Cache\RedisCacheStore'
+
+  App\Infrastructure\Lock\RedisRequestLockManager:
+    arguments:
+      $dsn: '%env(REDIS_DSN)%'
+  App\Concurrency\RequestLockManager: '@App\Infrastructure\Lock\RedisRequestLockManager'
+
+  App\Performance\Idempotency\IdempotencyService:
+    arguments:
+      $ttlSeconds: '%app.performance.idempotency_ttl%'
+      $lockTtlSeconds: '%app.performance.idempotency_lock_ttl%'
+
+  App\Performance\Http\JsonHttpCacheService:
+    arguments:
+      $defaultMaxAge: '%app.performance.http_cache_max_age%'
+
+  App\Performance\Http\RequestProfilingSubscriber:
+    arguments:
+      $slowRequestThresholdMs: '%app.performance.slow_request_ms%'
+
+  App\Controller\Security\LoginController:
+    arguments:
+      $maxAttempts: '%app.security.login_max_attempts%'
+      $windowSeconds: '%app.security.login_window_seconds%'
+
+  App\Controller\Api\AuthTokenController:
+    arguments:
+      $maxAttempts: '%app.security.api_token_max_attempts%'
+      $windowSeconds: '%app.security.api_token_window_seconds%'
 
   App\Messaging\Publisher\RabbitMqMessagePublisher:
     arguments:

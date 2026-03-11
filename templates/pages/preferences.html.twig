@@ -8,6 +8,7 @@
         </div>
 
         <form method="post" action="/preferences" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <label>
                 Theme
                 <select name="theme">

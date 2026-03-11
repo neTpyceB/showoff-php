@@ -11,6 +11,7 @@ use App\Security\UserRepository;
 use Showoff\Core\Persistence\Migration\PdoMigrator;
 use Showoff\Core\Persistence\Migration\Version202603020001;
 use Showoff\Core\Persistence\Migration\Version202603100001;
+use Showoff\Core\Persistence\Migration\Version202603110001;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -48,7 +49,9 @@ final class SecurityArchitectureTest extends WebTestCase
     public function testLoginAuthenticatesAndGrantsAdminAccess(): void
     {
         $client = self::requireClient();
+        $token = $this->csrfToken($client, '/login');
         $client->request('POST', '/login', [
+            '_csrf_token' => $token,
             'email' => 'admin@example.com',
             'password' => 'VeryStrongPassword123!',
         ]);
@@ -63,13 +66,75 @@ final class SecurityArchitectureTest extends WebTestCase
     public function testInvalidLoginIsRejected(): void
     {
         $client = self::requireClient();
+        $token = $this->csrfToken($client, '/login');
         $client->request('POST', '/login', [
+            '_csrf_token' => $token,
             'email' => 'admin@example.com',
             'password' => 'wrong-password',
         ]);
 
         self::assertResponseStatusCodeSame(401);
         self::assertSelectorTextContains('.error', 'Invalid credentials.');
+    }
+
+    public function testLoginRequiresValidCsrfToken(): void
+    {
+        $client = self::requireClient();
+        $client->request('POST', '/login', [
+            '_csrf_token' => 'invalid',
+            'email' => 'admin@example.com',
+            'password' => 'VeryStrongPassword123!',
+        ]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertSelectorTextContains('.error', 'Invalid form token. Refresh and try again.');
+    }
+
+    public function testLoginRateLimitBlocksRepeatedFailures(): void
+    {
+        $client = self::requireClient();
+        $email = 'blocked+' . bin2hex(random_bytes(4)) . '@example.com';
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $token = $this->csrfToken($client, '/login');
+            $client->request('POST', '/login', [
+                '_csrf_token' => $token,
+                'email' => $email,
+                'password' => 'wrong-password',
+            ]);
+        }
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertSelectorTextContains('.error', 'Too many failed sign-in attempts. Try again later.');
+        self::assertTrue($client->getResponse()->headers->has('Retry-After'));
+    }
+
+    public function testSecurityHeadersAreApplied(): void
+    {
+        $client = self::requireClient();
+        $client->request('GET', '/');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('nosniff', $client->getResponse()->headers->get('X-Content-Type-Options'));
+        self::assertSame('DENY', $client->getResponse()->headers->get('X-Frame-Options'));
+        self::assertSame('no-referrer', $client->getResponse()->headers->get('Referrer-Policy'));
+        self::assertNotNull($client->getResponse()->headers->get('Content-Security-Policy'));
+    }
+
+    public function testLogoutRequiresValidCsrfToken(): void
+    {
+        $client = self::requireClient();
+        $token = $this->csrfToken($client, '/login');
+        $client->request('POST', '/login', [
+            '_csrf_token' => $token,
+            'email' => 'admin@example.com',
+            'password' => 'VeryStrongPassword123!',
+        ]);
+        self::assertResponseRedirects('/admin', 303);
+
+        $client->request('POST', '/logout', ['_csrf_token' => 'invalid']);
+
+        self::assertResponseStatusCodeSame(403);
     }
 
     public function testProtectedApiWriteRequiresBearerToken(): void
@@ -89,6 +154,28 @@ final class SecurityArchitectureTest extends WebTestCase
         self::assertResponseStatusCodeSame(401);
     }
 
+    public function testApiTokenIssuanceIsRateLimitedOnFailures(): void
+    {
+        $client = self::requireClient();
+        $email = 'api-lock+' . bin2hex(random_bytes(4)) . '@example.com';
+
+        for ($attempt = 0; $attempt < 10; $attempt++) {
+            $client->request(
+                'POST',
+                '/api/v1/auth/token',
+                server: ['CONTENT_TYPE' => 'application/json'],
+                content: json_encode([
+                    'email' => $email,
+                    'password' => 'wrong-password',
+                ], JSON_THROW_ON_ERROR),
+            );
+        }
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertResponseFormatSame('json');
+        self::assertTrue($client->getResponse()->headers->has('Retry-After'));
+    }
+
     private function runMigrations(ContainerInterface $container): void
     {
         $pdo = $container->get(\PDO::class);
@@ -96,7 +183,7 @@ final class SecurityArchitectureTest extends WebTestCase
             throw new \RuntimeException('Expected PDO service.');
         }
 
-        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001()]);
+        $migrator = new PdoMigrator($pdo, [new Version202603020001(), new Version202603100001(), new Version202603110001()]);
         $migrator->migrate();
     }
 
@@ -125,5 +212,17 @@ final class SecurityArchitectureTest extends WebTestCase
         }
 
         return $client;
+    }
+
+    private function csrfToken(KernelBrowser $client, string $path): string
+    {
+        $crawler = $client->request('GET', $path);
+        $input = $crawler->filter('input[name="_csrf_token"]')->first();
+        self::assertGreaterThan(0, $input->count());
+
+        $token = $input->attr('value');
+        self::assertIsString($token);
+
+        return $token;
     }
 }

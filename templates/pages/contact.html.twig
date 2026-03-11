@@ -10,6 +10,8 @@
         </div>
 
         <form method="post" action="/contact" novalidate>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            {% if errors._csrf_token is defined %}<p class="error">{{ errors._csrf_token }}</p>{% endif %}
             <label>
                 Name
                 <input type="text" name="name" value="{{ values.name }}">
