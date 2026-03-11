@@ -1,13 +1,12 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment` stage. This iteration adds automated pipelines, production container builds, operational health/metrics endpoints, structured request logging, and Railway deployment automation.
+Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment` stage. This iteration adds automated pipelines, production container builds, operational health/metrics endpoints, structured request logging, and Railway-ready runtime configuration.
 
 ## Project structure
 
 ```text
 .
 ├── .github/workflows/ci.yml
-├── .github/workflows/deploy-railway.yml
 ├── AGENTS.md
 ├── Dockerfile
 ├── README.md

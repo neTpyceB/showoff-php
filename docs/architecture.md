@@ -96,7 +96,7 @@ Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
 ### `.github/workflows`
 
-Quality gate pipeline (`ci.yml`) and Railway deployment workflow (`deploy-railway.yml`).
+Quality gate pipeline (`ci.yml`) including Docker production image build/push.
 
 ### `railway.toml`
 
