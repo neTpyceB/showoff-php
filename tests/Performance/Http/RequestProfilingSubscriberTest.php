@@ -38,6 +38,7 @@ final class RequestProfilingSubscriberTest extends TestCase
 
         self::assertNotNull($response->headers->get('X-Response-Time-Ms'));
         self::assertNotNull($response->headers->get('X-Memory-Delta-Kb'));
+        self::assertNotNull($response->headers->get('X-Request-Id'));
     }
 
     public function testItSkipsSubRequests(): void

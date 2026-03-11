@@ -1,3 +1,6 @@
+parameters:
+  app.observability.structured_logging_enabled: false
+
 services:
   App\Infrastructure\Cache\ArrayCacheStore: ~
   App\Cache\CacheStore: '@App\Infrastructure\Cache\ArrayCacheStore'

@@ -52,6 +52,9 @@ curl -i http://127.0.0.1:8081/contact
 curl -i http://127.0.0.1:8081/preferences
 curl -i http://127.0.0.1:8081/login
 curl -i http://127.0.0.1:8081/admin
+curl -i http://127.0.0.1:8081/health/live
+curl -i http://127.0.0.1:8081/health/ready
+curl -i http://127.0.0.1:8081/metrics
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag-from-first-response>"'
@@ -74,4 +77,13 @@ The app container runs `php-fpm` as PID 1. Nginx is the public entrypoint.
 
 ## Railway
 
-The repository is Dockerfile-driven and includes `railway.toml`. Railway can build and run the application directly from the repository root.
+The repository is Dockerfile-driven and includes `railway.toml`.
+
+Required GitHub secrets for automated Railway deploy workflow:
+
+- `RAILWAY_TOKEN`
+- `RAILWAY_PROJECT_ID`
+- `RAILWAY_ENVIRONMENT_ID`
+- `RAILWAY_SERVICE_NAME` (optional)
+
+Railway healthcheck path is `/health/live`.

@@ -2,14 +2,15 @@
 
 ## Scope
 
-This stage implements performance and scalability foundations:
+This stage implements DevOps, CI/CD, and production deployment foundations:
 
 - strict typing and modern PHP 8.5 conventions
-- request-level profiling via Symfony kernel events
-- HTTP response caching with ETag and conditional requests
-- idempotent API writes backed by lock-based concurrency control
-- Redis-backed lock and cache implementations with test-safe in-memory adapters
-- migration-driven database index tuning for read-heavy contact submission queries
+- multi-stage Docker image strategy (development and production targets)
+- GitHub Actions quality and container build pipelines
+- Railway deployment workflow and service configuration
+- runtime observability endpoints (`/health/live`, `/health/ready`, `/metrics`)
+- structured request logging with per-request correlation IDs
+- request-level telemetry counters for monitoring ingestion
 
 ## Modules
 
@@ -57,6 +58,14 @@ API layer request DTOs and GraphQL schema provider.
 
 Authentication, authorization, role model, token issuance/validation, and crypto utilities.
 
+### `src/Operations`
+
+Operational readiness logic and deployment-facing health checks.
+
+### `src/Observability`
+
+Metrics aggregation and monitoring payload generation.
+
 ### `src/Messaging`
 
 Message contracts, RabbitMQ publisher, queue consumer, and event handlers.
@@ -71,7 +80,7 @@ Lock abstraction with Redis and in-memory implementations for idempotent, concur
 
 ### `src/Performance`
 
-Idempotency orchestration, JSON HTTP cache responder, and request profiling subscriber.
+Idempotency orchestration, JSON HTTP cache responder, and profiling/logging telemetry subscriber.
 
 ### `src/Application`
 
@@ -85,6 +94,14 @@ Request DTOs with Symfony validation constraints.
 
 Factory services for infrastructure objects (`AppConfig`, `PDO`).
 
+### `.github/workflows`
+
+Quality gate pipeline (`ci.yml`) including Docker production image build/push.
+
+### `railway.toml`
+
+Railway deployment runtime contract, healthcheck path, and startup command.
+
 ## Extension path
 
-Future stages can scale by adding read replicas, advanced query telemetry, adaptive cache TTL policies, and distributed tracing integration.
+Future stages can scale by adding OpenTelemetry exporters, centralized log sinks, canary deploys, and rollback automation.

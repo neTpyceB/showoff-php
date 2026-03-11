@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: development
     working_dir: /var/www/app
     env_file:
       - env/app.env
@@ -38,7 +39,7 @@ services:
       - ./:/var/www/app:ro
       - ./docker/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ | grep -q \"HTTP fundamentals\""]
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/health/live | grep -q \"\\\"alive\\\"\""]
       interval: 10s
       timeout: 3s
       retries: 5

@@ -3,6 +3,8 @@ parameters:
   app.performance.idempotency_ttl: '%env(int:PERFORMANCE_IDEMPOTENCY_TTL_SECONDS)%'
   app.performance.idempotency_lock_ttl: '%env(int:PERFORMANCE_LOCK_TTL_SECONDS)%'
   app.performance.slow_request_ms: '%env(int:PERFORMANCE_SLOW_REQUEST_MS)%'
+  app.observability.structured_logging_enabled: '%env(bool:OBSERVABILITY_STRUCTURED_LOGGING_ENABLED)%'
+  app.observability.metrics_token: '%env(OBSERVABILITY_METRICS_TOKEN)%'
   app.security.login_max_attempts: '%env(int:SECURITY_LOGIN_MAX_ATTEMPTS)%'
   app.security.login_window_seconds: '%env(int:SECURITY_LOGIN_WINDOW_SECONDS)%'
   app.security.api_token_max_attempts: '%env(int:SECURITY_API_TOKEN_MAX_ATTEMPTS)%'
@@ -86,6 +88,11 @@ services:
   App\Performance\Http\RequestProfilingSubscriber:
     arguments:
       $slowRequestThresholdMs: '%app.performance.slow_request_ms%'
+      $structuredLoggingEnabled: '%app.observability.structured_logging_enabled%'
+
+  App\Observability\Metrics\RequestMetricsStore:
+    arguments:
+      $slowRequestThresholdMs: '%app.performance.slow_request_ms%'
 
   App\Controller\Security\LoginController:
     arguments:
@@ -96,6 +103,10 @@ services:
     arguments:
       $maxAttempts: '%app.security.api_token_max_attempts%'
       $windowSeconds: '%app.security.api_token_window_seconds%'
+
+  App\Controller\Operations\MetricsController:
+    arguments:
+      $metricsToken: '%app.observability.metrics_token%'
 
   App\Messaging\Publisher\RabbitMqMessagePublisher:
     arguments:
