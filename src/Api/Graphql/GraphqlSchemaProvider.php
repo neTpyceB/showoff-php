@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Api\Graphql;
 
 use App\Application\Contact\ApiContactSubmissionService;
+use App\Application\Contact\ContactSubmissionStatsService;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use Showoff\Core\Domain\Contact\ContactSubmission;
-use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 
 final class GraphqlSchemaProvider
 {
     private ?Schema $schema = null;
 
     public function __construct(
-        private readonly ContactSubmissionRepository $submissionRepository,
+        private readonly ContactSubmissionStatsService $stats,
         private readonly ApiContactSubmissionService $submissionService,
     ) {}
 
@@ -69,10 +69,7 @@ final class GraphqlSchemaProvider
             'fields' => [
                 'contactSubmissionStats' => [
                     'type' => Type::nonNull($statsType),
-                    'resolve' => fn(): array => [
-                        'count' => $this->submissionRepository->countAll(),
-                        'latest' => $this->normalizeSubmission($this->submissionRepository->latest()),
-                    ],
+                    'resolve' => fn(): array => $this->stats->get(),
                 ],
             ],
         ]);

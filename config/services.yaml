@@ -54,5 +54,30 @@ services:
   Showoff\Core\Http\Session\SessionFactory: '@Showoff\Core\Http\Session\NativeSessionFactory'
   Showoff\Core\Http\Session\WebSessionManager: ~
 
+  App\Infrastructure\Cache\RedisCacheStore:
+    arguments:
+      $dsn: '%env(REDIS_DSN)%'
+  App\Cache\CacheStore: '@App\Infrastructure\Cache\RedisCacheStore'
+
+  App\Messaging\Publisher\RabbitMqMessagePublisher:
+    arguments:
+      $host: '%env(RABBITMQ_HOST)%'
+      $port: '%env(int:RABBITMQ_PORT)%'
+      $user: '%env(RABBITMQ_USER)%'
+      $password: '%env(RABBITMQ_PASSWORD)%'
+      $vhost: '%env(RABBITMQ_VHOST)%'
+      $queueName: '%env(RABBITMQ_QUEUE)%'
+  App\Messaging\Publisher\MessagePublisher: '@App\Messaging\Publisher\RabbitMqMessagePublisher'
+
+  App\Messaging\ContactSubmissionEventConsumer:
+    arguments:
+      $host: '%env(RABBITMQ_HOST)%'
+      $port: '%env(int:RABBITMQ_PORT)%'
+      $user: '%env(RABBITMQ_USER)%'
+      $password: '%env(RABBITMQ_PASSWORD)%'
+      $vhost: '%env(RABBITMQ_VHOST)%'
+      $queueName: '%env(RABBITMQ_QUEUE)%'
+  App\Messaging\ContactSubmissionConsumer: '@App\Messaging\ContactSubmissionEventConsumer'
+
   Showoff\Core\Console\Command\:
     resource: '../packages/console/src/Console/Command/'

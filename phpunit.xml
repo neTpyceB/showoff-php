@@ -22,5 +22,12 @@
         <server name="APP_DEBUG" value="0"/>
         <server name="DATABASE_DSN" value="sqlite::memory:"/>
         <server name="DATABASE_DRIVER" value="sqlite"/>
+        <server name="REDIS_DSN" value="tcp://127.0.0.1:6379"/>
+        <server name="RABBITMQ_HOST" value="127.0.0.1"/>
+        <server name="RABBITMQ_PORT" value="5672"/>
+        <server name="RABBITMQ_USER" value="guest"/>
+        <server name="RABBITMQ_PASSWORD" value="guest"/>
+        <server name="RABBITMQ_VHOST" value="/"/>
+        <server name="RABBITMQ_QUEUE" value="contact_submission_events"/>
     </php>
 </phpunit>

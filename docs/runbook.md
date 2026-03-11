@@ -38,6 +38,7 @@ docker compose exec app php bin/console app:config:dump
 docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
+docker compose exec app php bin/console app:worker:contact-events --limit=50
 docker compose exec app php bin/console app:health:check
 ```
 
@@ -62,6 +63,8 @@ docker compose ps
 docker compose exec app sh
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
 docker compose exec db mysql -ushowoff -pshowoff -Dshowoff -e 'SHOW TABLES;'
+docker compose exec redis redis-cli ping
+docker compose exec rabbitmq rabbitmqctl list_queues
 ```
 
 The app container runs `php-fpm` as PID 1. Nginx is the public entrypoint.

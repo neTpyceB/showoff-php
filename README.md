@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Application Security Architecture` stage. This iteration adds authentication, authorization, roles, secure sessions, token-protected APIs, and encryption utilities.
+Strict-typed PHP 8.5 application for the `Async Processing, Messaging & Caching` stage. This iteration adds RabbitMQ-driven background workflows, Redis caching, and queue worker processing.
 
 ## Project structure
 
@@ -44,9 +44,11 @@ Strict-typed PHP 8.5 application for the `Application Security Architecture` sta
 ├── src
 │   ├── Application
 │   ├── Api
+│   ├── Cache
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
+│   ├── Messaging
 │   ├── Security
 │   └── Kernel.php
 ├── templates
@@ -110,6 +112,7 @@ docker compose up --build -d
 docker compose exec app sh
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
+docker compose exec app php bin/console app:worker:contact-events --limit=50
 docker compose exec app php bin/console app:health:check
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
@@ -124,6 +127,8 @@ Docker services:
 web: http://127.0.0.1:8081/
 app: php-fpm on 9000 inside compose
 db:  mysql on 127.0.0.1:3307
+redis: redis on 127.0.0.1:6380
+rabbitmq: amqp on 127.0.0.1:5673, management on 127.0.0.1:15673
 ```
 
 Local packages:

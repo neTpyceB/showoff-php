@@ -6,9 +6,9 @@ namespace App\Controller\Api;
 
 use App\Api\Rest\Request\CreateContactSubmissionRequest;
 use App\Application\Contact\ApiContactSubmissionService;
+use App\Application\Contact\ContactSubmissionStatsService;
 use App\Security\ApiTokenService;
 use Showoff\Core\Domain\Contact\ContactSubmission;
-use Showoff\Core\Domain\Contact\Repository\ContactSubmissionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class ContactSubmissionController extends AbstractController
 {
     public function __construct(
-        private readonly ContactSubmissionRepository $submissionRepository,
+        private readonly ContactSubmissionStatsService $stats,
         private readonly ApiContactSubmissionService $submissionService,
         private readonly ApiTokenService $apiTokens,
         private readonly ValidatorInterface $validator,
@@ -31,10 +31,7 @@ final class ContactSubmissionController extends AbstractController
     public function index(): JsonResponse
     {
         return $this->json([
-            'data' => [
-                'count' => $this->submissionRepository->countAll(),
-                'latest' => $this->normalizeSubmission($this->submissionRepository->latest()),
-            ],
+            'data' => $this->stats->get(),
         ]);
     }
 
