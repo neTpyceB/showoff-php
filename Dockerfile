@@ -2,8 +2,8 @@ FROM composer:2.8 AS composer
 
 FROM php:8.5-fpm-alpine
 
-RUN apk add --no-cache bash fcgi oniguruma-dev mysql-client sqlite-dev \
-    && docker-php-ext-install mbstring pdo_mysql pdo_sqlite
+RUN apk add --no-cache bash fcgi oniguruma-dev mysql-client sqlite-dev linux-headers \
+    && docker-php-ext-install mbstring pdo_mysql pdo_sqlite sockets
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 

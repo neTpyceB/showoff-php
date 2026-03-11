@@ -18,15 +18,19 @@ final readonly class ContactSubmissionApplicationService
     public function __construct(
         private SubmitContactSubmission $submitContactSubmission,
         private SubmissionSourceStrategy $submissionSourceStrategy,
+        private ContactSubmissionAsyncWorkflow $asyncWorkflow,
     ) {}
 
     public function submit(ContactRequest $requestData, Request $request): void
     {
-        $this->submitContactSubmission->submit(
+        $source = $this->submissionSourceStrategy->resolve($request);
+        $submission = $this->submitContactSubmission->submit(
             name: new ContactName($requestData->name),
             email: new ContactEmail($requestData->email),
             message: new ContactMessage($requestData->message),
-            source: new ContactSubmissionSource($this->submissionSourceStrategy->resolve($request)),
+            source: new ContactSubmissionSource($source),
         );
+
+        $this->asyncWorkflow->afterStored($submission, $source);
     }
 }

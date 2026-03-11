@@ -1,0 +1,6 @@
+services:
+  App\Infrastructure\Cache\ArrayCacheStore: ~
+  App\Cache\CacheStore: '@App\Infrastructure\Cache\ArrayCacheStore'
+
+  App\Messaging\Publisher\NullMessagePublisher: ~
+  App\Messaging\Publisher\MessagePublisher: '@App\Messaging\Publisher\NullMessagePublisher'

@@ -3,13 +3,13 @@
 ## Project identity
 
 - Name: `showoff-php/foundational-core`
-- Topic: `Application Security Architecture`
-- Current stage: Authentication, authorization, role model, secure sessions, bearer-token API protection, encryption
+- Topic: `Async Processing, Messaging & Caching`
+- Current stage: RabbitMQ queue publishing/consumption, Redis caching, background worker workflow
 - PHP target: `8.5`
 
 ## Active architecture constraints
 
-- Keep scope limited to security concerns: authentication flows, authorization policies, secure session/token handling, and encryption.
+- Keep scope limited to async/caching concerns: message dispatch, workers, cache usage/invalidation, and event-driven flow.
 - Prefer strict typing, readonly value objects, and explicit validation.
 - Keep framework entrypoints thin and move logic into testable services.
 - Keep controllers thin and move logic into testable services.
@@ -29,6 +29,8 @@
 - `src/Application`: application services used by controllers
 - `src/Api`: API-layer request/schema components
 - `src/Security`: role model, authentication services, token services, crypto helpers
+- `src/Messaging`: queue message contracts, publisher, consumer, handlers
+- `src/Cache` + `src/Infrastructure/Cache`: cache abstraction and Redis implementation
 - `src/Http/Form`: request DTOs + Symfony validation attributes
 - `src/Factory`: infrastructure factories wired through Symfony DI
 - `docker/`: PHP-FPM and Nginx runtime configuration
@@ -53,5 +55,6 @@ docker compose exec app php bin/console app:database:migrate
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count } }"}'
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
+docker compose exec app php bin/console app:worker:contact-events --limit=50
 composer show showoff/*
 ```
