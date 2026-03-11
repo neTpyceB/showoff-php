@@ -7,5 +7,13 @@ framework:
     cookie_secure: auto
     cookie_httponly: true
     cookie_samesite: strict
+  form: true
+  serializer:
+    enabled: true
+  messenger:
+    transports:
+      sync: 'sync://'
+    routing:
+      'App\Showcase\Application\Messaging\ShowcaseAuditMessage': sync
   validation:
     enabled: true

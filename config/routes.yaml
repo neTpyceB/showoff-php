@@ -3,3 +3,9 @@ controllers:
     path: ../src/Controller/
     namespace: App\Controller
   type: attribute
+
+showcase_controllers:
+  resource:
+    path: ../src/Showcase/Infrastructure/Http/
+    namespace: App\Showcase\Infrastructure\Http
+  type: attribute

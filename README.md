@@ -1,6 +1,6 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment` stage. This iteration adds automated pipelines, production container builds, operational health/metrics endpoints, structured request logging, and Railway-ready runtime configuration.
+Strict-typed PHP 8.5 application for the `Advanced Symfony Features & Ecosystem Capabilities` stage. This iteration adds a dedicated showcase module demonstrating custom bundle/extension/compiler pass, service tags, kernel events + middleware, forms, validators, voters, serializer customization, Messenger integration, and framework internals.
 
 ## Project structure
 
@@ -28,9 +28,11 @@ Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment`
 │   ├── app.prod.env.example
 │   └── mysql.env
 ├── docs
+│   ├── advanced-symfony-features.md
 │   ├── architecture.md
 │   ├── devops-cicd.md
 │   ├── development.md
+│   ├── enterprise-architecture.md
 │   ├── security-audit.md
 │   ├── security-roadmap.md
 │   └── runbook.md
@@ -53,11 +55,14 @@ Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment`
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
+│   ├── Module
 │   ├── Observability
 │   ├── Operations
 │   ├── Performance
 │   ├── Messaging
+│   ├── Realtime
 │   ├── Security
+│   ├── Showcase
 │   └── Kernel.php
 ├── templates
 │   ├── layout
@@ -88,6 +93,9 @@ http://127.0.0.1:8081/
 http://127.0.0.1:8081/contact
 http://127.0.0.1:8081/preferences
 http://127.0.0.1:8081/api/v1/contact-submissions
+http://127.0.0.1:8081/api/v1/analytics/contact-submissions
+http://127.0.0.1:8081/api/v1/showcase/report
+http://127.0.0.1:8081/api/v1/showcase/diagnostics
 POST http://127.0.0.1:8081/api/graphql
 http://127.0.0.1:8081/login
 http://127.0.0.1:8081/admin
@@ -124,9 +132,16 @@ docker compose exec app sh
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 docker compose exec app php bin/console app:worker:contact-events --limit=50
+docker compose exec app php bin/console app:showcase:pipeline
 docker compose exec app php bin/console app:health:check
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
+curl -i http://127.0.0.1:8081/api/v1/analytics/contact-submissions
+curl -i http://127.0.0.1:8081/api/v1/showcase/report
+curl -i http://127.0.0.1:8081/api/v1/showcase/diagnostics -H 'X-Showcase-Roles: ROLE_ADMIN'
+curl -i -X POST http://127.0.0.1:8081/api/v1/showcase/audit -H 'Content-Type: application/json' -d '{"action":"pipeline.started"}'
+curl -i -X POST http://127.0.0.1:8081/api/v1/showcase/settings/validate -H 'Content-Type: application/json' -d '{"code":"valid-code-101","notes":"ok"}'
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
+curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionProcessing { processed lastEmail lastOccurredAt } }"}'
 curl -i http://127.0.0.1:8081/health/live
 curl -i http://127.0.0.1:8081/health/ready
 curl -i http://127.0.0.1:8081/metrics
@@ -163,6 +178,8 @@ More detail lives in:
 
 - [`docs/architecture.md`](docs/architecture.md)
 - [`docs/devops-cicd.md`](docs/devops-cicd.md)
+- [`docs/enterprise-architecture.md`](docs/enterprise-architecture.md)
+- [`docs/advanced-symfony-features.md`](docs/advanced-symfony-features.md)
 - [`docs/development.md`](docs/development.md)
 - [`docs/runbook.md`](docs/runbook.md)
 - [`docs/security-audit.md`](docs/security-audit.md)

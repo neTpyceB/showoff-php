@@ -10,3 +10,6 @@ services:
 
   App\Messaging\Publisher\NullMessagePublisher: ~
   App\Messaging\Publisher\MessagePublisher: '@App\Messaging\Publisher\NullMessagePublisher'
+
+  App\Realtime\Publisher\NullRealtimePublisher: ~
+  App\Realtime\Publisher\RealtimePublisher: '@App\Realtime\Publisher\NullRealtimePublisher'

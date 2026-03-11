@@ -5,6 +5,10 @@ parameters:
   app.performance.slow_request_ms: '%env(int:PERFORMANCE_SLOW_REQUEST_MS)%'
   app.observability.structured_logging_enabled: '%env(bool:OBSERVABILITY_STRUCTURED_LOGGING_ENABLED)%'
   app.observability.metrics_token: '%env(OBSERVABILITY_METRICS_TOKEN)%'
+  app.realtime.mercure_hub_url: '%env(REALTIME_MERCURE_HUB_URL)%'
+  app.realtime.mercure_jwt: '%env(REALTIME_MERCURE_JWT)%'
+  app.realtime.contact_topic: '%env(REALTIME_CONTACT_TOPIC)%'
+  app.realtime.publish_timeout_ms: '%env(int:REALTIME_PUBLISH_TIMEOUT_MS)%'
   app.security.login_max_attempts: '%env(int:SECURITY_LOGIN_MAX_ATTEMPTS)%'
   app.security.login_window_seconds: '%env(int:SECURITY_LOGIN_WINDOW_SECONDS)%'
   app.security.api_token_max_attempts: '%env(int:SECURITY_API_TOKEN_MAX_ATTEMPTS)%'
@@ -76,6 +80,9 @@ services:
       $dsn: '%env(REDIS_DSN)%'
   App\Concurrency\RequestLockManager: '@App\Infrastructure\Lock\RedisRequestLockManager'
 
+  App\Module\Contact\Api\ContactPublicApi: '@App\Module\Contact\Application\ContactPublicApiService'
+  App\Module\Analytics\Api\AnalyticsPublicApi: '@App\Module\Analytics\Application\CachedAnalyticsPublicApi'
+
   App\Performance\Idempotency\IdempotencyService:
     arguments:
       $ttlSeconds: '%app.performance.idempotency_ttl%'
@@ -108,6 +115,17 @@ services:
     arguments:
       $metricsToken: '%app.observability.metrics_token%'
 
+  App\Realtime\Publisher\MercureRealtimePublisher:
+    arguments:
+      $hubUrl: '%app.realtime.mercure_hub_url%'
+      $jwt: '%app.realtime.mercure_jwt%'
+      $timeoutMs: '%app.realtime.publish_timeout_ms%'
+  App\Realtime\Publisher\RealtimePublisher: '@App\Realtime\Publisher\MercureRealtimePublisher'
+
+  App\Messaging\ContactSubmissionEventHandler:
+    arguments:
+      $contactTopic: '%app.realtime.contact_topic%'
+
   App\Messaging\Publisher\RabbitMqMessagePublisher:
     arguments:
       $host: '%env(RABBITMQ_HOST)%'
@@ -127,6 +145,43 @@ services:
       $vhost: '%env(RABBITMQ_VHOST)%'
       $queueName: '%env(RABBITMQ_QUEUE)%'
   App\Messaging\ContactSubmissionConsumer: '@App\Messaging\ContactSubmissionEventConsumer'
+
+  App\Showcase\Infrastructure\Http\Kernel\ShowcaseKernelMiddleware:
+    decorates: 'http_kernel'
+    arguments:
+      $inner: '@App\Showcase\Infrastructure\Http\Kernel\ShowcaseKernelMiddleware.inner'
+
+  App\Showcase\Infrastructure\Http\ShowcaseController:
+    arguments:
+      $moduleName: '%advanced_showcase.module_name%'
+
+  App\Showcase\Infrastructure\Http\ResponseHeaderSubscriber:
+    arguments:
+      $moduleName: '%advanced_showcase.module_name%'
+
+  App\Showcase\Infrastructure\Console\RunShowcasePipelineCommand:
+    arguments:
+      $moduleName: '%advanced_showcase.module_name%'
+
+  App\Showcase\Application\Security\ShowcaseAccessDecider:
+    arguments:
+      $enforceDiagnosticsAccess: '%advanced_showcase.enforce_diagnostics_access%'
+
+  App\Showcase\Application\Processor\DiagnosticsStageProcessor:
+    tags:
+      - { name: 'showcase.processor', priority: 200 }
+
+  App\Showcase\Application\Processor\MessagingStageProcessor:
+    tags:
+      - { name: 'showcase.processor', priority: 100 }
+
+  App\Showcase\Infrastructure\Serialization\ShowcaseReportNormalizer:
+    tags:
+      - { name: 'serializer.normalizer', priority: 500 }
+
+  App\Showcase\Infrastructure\Form\TrimmedTextTypeExtension:
+    tags:
+      - 'form.type_extension'
 
   Showoff\Core\Console\Command\:
     resource: '../packages/console/src/Console/Command/'

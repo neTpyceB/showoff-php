@@ -1,0 +1,3 @@
+advanced_showcase:
+  module_name: 'advanced_symfony_showcase'
+  enforce_diagnostics_access: true

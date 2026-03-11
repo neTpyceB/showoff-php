@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Api\Graphql;
 
-use App\Application\Contact\ApiContactSubmissionService;
-use App\Application\Contact\ContactSubmissionStatsService;
+use App\Module\Analytics\Api\AnalyticsPublicApi;
+use App\Module\Contact\Api\ContactPublicApi;
+use App\Module\Contact\Api\ContactSubmissionInput;
 use GraphQL\Error\UserError;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
-use Showoff\Core\Domain\Contact\ContactSubmission;
 
 final class GraphqlSchemaProvider
 {
     private ?Schema $schema = null;
 
     public function __construct(
-        private readonly ContactSubmissionStatsService $stats,
-        private readonly ApiContactSubmissionService $submissionService,
+        private readonly ContactPublicApi $contactApi,
+        private readonly AnalyticsPublicApi $analyticsApi,
     ) {}
 
     public function schema(): Schema
@@ -55,6 +55,15 @@ final class GraphqlSchemaProvider
             ],
         ]);
 
+        $processingType = new ObjectType([
+            'name' => 'ContactSubmissionProcessingStats',
+            'fields' => [
+                'processed' => Type::nonNull(Type::int()),
+                'lastEmail' => Type::string(),
+                'lastOccurredAt' => Type::string(),
+            ],
+        ]);
+
         $mutationInputType = new InputObjectType([
             'name' => 'SubmitContactSubmissionInput',
             'fields' => [
@@ -69,7 +78,11 @@ final class GraphqlSchemaProvider
             'fields' => [
                 'contactSubmissionStats' => [
                     'type' => Type::nonNull($statsType),
-                    'resolve' => fn(): array => $this->stats->get(),
+                    'resolve' => fn(): array => $this->contactApi->stats()->toArray(),
+                ],
+                'contactSubmissionProcessing' => [
+                    'type' => Type::nonNull($processingType),
+                    'resolve' => fn(): array => $this->analyticsApi->contactSubmissionProcessing()->toArray(),
                 ],
             ],
         ]);
@@ -93,18 +106,18 @@ final class GraphqlSchemaProvider
                         $message = trim($this->stringValue($input, 'message'));
 
                         try {
-                            $submission = $this->submissionService->submit(
+                            $submission = $this->contactApi->submit(new ContactSubmissionInput(
                                 name: $name,
                                 email: $email,
                                 message: $message,
                                 source: 'graphql_api',
-                            );
+                            ));
                         } catch (\Throwable $exception) {
                             throw new UserError($exception->getMessage());
                         }
 
                         return [
-                            'submission' => $this->normalizeSubmission($submission),
+                            'submission' => $submission->toArray(),
                         ];
                     },
                 ],
@@ -117,25 +130,6 @@ final class GraphqlSchemaProvider
         ]);
 
         return $this->schema;
-    }
-
-    /**
-     * @return array{id: int, name: string, email: string, message: string, status: string, submittedAt: string}|null
-     */
-    private function normalizeSubmission(?ContactSubmission $submission): ?array
-    {
-        if ($submission === null || $submission->id === null) {
-            return null;
-        }
-
-        return [
-            'id' => $submission->id->value,
-            'name' => $submission->name->value,
-            'email' => $submission->email->value,
-            'message' => $submission->message->value,
-            'status' => $submission->status->value,
-            'submittedAt' => $submission->submittedAt->format(\DateTimeInterface::ATOM),
-        ];
     }
 
     /**
