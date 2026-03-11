@@ -19,10 +19,15 @@ docker compose exec app php bin/console app:database:status
 docker compose exec app php bin/console app:database:migrate
 docker compose exec app php bin/console app:security:create-user admin@example.com 'VeryStrongPassword123!' admin
 docker compose exec app php bin/console app:worker:contact-events --limit=50
+docker compose exec app php -S 0.0.0.0:8080 -t public public/index.php
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count } }"}'
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag>"'
 curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Performance stage payload."}'
+curl -i http://127.0.0.1:8081/health/live
+curl -i http://127.0.0.1:8081/health/ready
+curl -i http://127.0.0.1:8081/metrics
+docker build --target production -t showoff-php:prod .
 ```
 
 ## Environment
@@ -75,6 +80,8 @@ Key variables:
 - `PERFORMANCE_IDEMPOTENCY_TTL_SECONDS`
 - `PERFORMANCE_LOCK_TTL_SECONDS`
 - `PERFORMANCE_SLOW_REQUEST_MS`
+- `OBSERVABILITY_STRUCTURED_LOGGING_ENABLED`
+- `OBSERVABILITY_METRICS_TOKEN`
 - `SECURITY_LOGIN_MAX_ATTEMPTS`
 - `SECURITY_LOGIN_WINDOW_SECONDS`
 - `SECURITY_API_TOKEN_MAX_ATTEMPTS`

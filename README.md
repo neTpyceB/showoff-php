@@ -1,12 +1,13 @@
 # Showoff PHP Core
 
-Strict-typed PHP 8.5 application for the `Performance Engineering & Scalability` stage. This iteration adds request profiling, HTTP caching, idempotent write handling with distributed locks, and DB index optimization.
+Strict-typed PHP 8.5 application for the `DevOps, CI/CD & Production Deployment` stage. This iteration adds automated pipelines, production container builds, operational health/metrics endpoints, structured request logging, and Railway deployment automation.
 
 ## Project structure
 
 ```text
 .
 ├── .github/workflows/ci.yml
+├── .github/workflows/deploy-railway.yml
 ├── AGENTS.md
 ├── Dockerfile
 ├── README.md
@@ -25,10 +26,14 @@ Strict-typed PHP 8.5 application for the `Performance Engineering & Scalability`
 ├── docker-compose.yml
 ├── env
 │   ├── app.env
+│   ├── app.prod.env.example
 │   └── mysql.env
 ├── docs
 │   ├── architecture.md
+│   ├── devops-cicd.md
 │   ├── development.md
+│   ├── security-audit.md
+│   ├── security-roadmap.md
 │   └── runbook.md
 ├── public/index.php
 ├── phpstan.neon.dist
@@ -49,6 +54,8 @@ Strict-typed PHP 8.5 application for the `Performance Engineering & Scalability`
 │   ├── Controller
 │   ├── Factory
 │   ├── Http
+│   ├── Observability
+│   ├── Operations
 │   ├── Performance
 │   ├── Messaging
 │   ├── Security
@@ -85,6 +92,9 @@ http://127.0.0.1:8081/api/v1/contact-submissions
 POST http://127.0.0.1:8081/api/graphql
 http://127.0.0.1:8081/login
 http://127.0.0.1:8081/admin
+http://127.0.0.1:8081/health/live
+http://127.0.0.1:8081/health/ready
+http://127.0.0.1:8081/metrics
 ```
 
 Port overrides (if needed):
@@ -118,8 +128,12 @@ docker compose exec app php bin/console app:worker:contact-events --limit=50
 docker compose exec app php bin/console app:health:check
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions
 curl -i -X POST http://127.0.0.1:8081/api/graphql -H 'Content-Type: application/json' -d '{"query":"{ contactSubmissionStats { count latest { id email } } }"}'
+curl -i http://127.0.0.1:8081/health/live
+curl -i http://127.0.0.1:8081/health/ready
+curl -i http://127.0.0.1:8081/metrics
 curl -i http://127.0.0.1:8081/api/v1/contact-submissions -H 'If-None-Match: "<etag-from-previous-response>"'
-curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Idempotency test payload for scalability stage."}'
+curl -i -X POST http://127.0.0.1:8081/api/v1/contact-submissions -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -H 'Idempotency-Key: demo-key-1' -d '{"name":"Ada Lovelace","email":"ada@example.com","message":"Deployment stage idempotency payload."}'
+docker build --target production -t showoff-php:prod .
 docker compose exec app php -m | grep pdo_mysql
 docker compose exec app php -m | grep pdo_sqlite
 docker compose exec db mysql -ushowoff -pshowoff -e 'SHOW DATABASES;'
@@ -149,6 +163,7 @@ showoff/persistence
 More detail lives in:
 
 - [`docs/architecture.md`](docs/architecture.md)
+- [`docs/devops-cicd.md`](docs/devops-cicd.md)
 - [`docs/development.md`](docs/development.md)
 - [`docs/runbook.md`](docs/runbook.md)
 - [`docs/security-audit.md`](docs/security-audit.md)
